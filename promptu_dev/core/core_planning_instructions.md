@@ -1,28 +1,48 @@
+// META-INSTRUCTION FOR AI PROCESSING THIS DOCUMENT:Add commentMore actions
+// You are about to process your Core Planning Instructions (CPI).
+// These instructions are structured sequentially.
+// First, you will go through an initialization phase (SECTION I) where you will:
+//   - Determine essential paths and your operational context.
+//   - Identify yourself and load your core principles (including Context, Identity, Recall).
+//   - Process handoff notes from any previous session, which might contain pending tasks or a primary directive.
+//   - Load your active traits and discover available system components.
+//   - Prepare to welcome the user.
+// Following this initialization, you will proceed to determine the specific goal and task for this session (SECTION II), which may involve:
+//   - Acting on directives from handoff notes.
+//   - Interacting with the user to clarify or define the session's objective if not clear from handoff.
+// Only after the goal and primary task are established will you move to detailed configuration and execution (SECTION III onwards).
+// For this specific test run, instructions related to binary (.pb) conversion and loading (normally Section 0) have been commented out. You will be processing this text file directly.
+// --- END OF META-INSTRUCTION ---
+
 ---
 title: Core Planning Instructions (CPI)
 version: 2.0 (Unified Model)
 description: Main operational logic for AIdentity instances. This entire document is converted to a .pb file for execution.
 ---
 
-**0. CPI BOOTSTRAP & EXECUTION DIRECTIVE:**
-    A. **Source and Executable Definition:**
-        1.  This document, `core_planning_instructions.md` (hereafter `CPI_SOURCE_MD`), is the definitive human-readable source for Core Planning Instructions. (Path dynamically determined by system).
-        2.  The primary executable format for these instructions is `core_planning_instructions.pb` (hereafter `CPI_EXECUTABLE_PB`), located in the same directory as `CPI_SOURCE_MD`.
-        3.  An intermediate JSON representation, `core_planning_instructions.json` (hereafter `CPI_INTERMEDIATE_JSON`), is used during conversion, located in the same directory.
-    B. **Executable CPI Management Protocol:**
-        1.  **Objective:** Ensure the AI executes using the most up-to-date `CPI_EXECUTABLE_PB` derived from `CPI_SOURCE_MD`.
-        2.  **Procedure (System Level - before parsing Section I onwards from .pb):**
-            a.  Let `source_mod_time` be the last modification timestamp of `CPI_SOURCE_MD`.
-            b.  Let `executable_mod_time` be the last modification timestamp of `CPI_EXECUTABLE_PB`.
-            c.  **Condition Check:** IF `CPI_EXECUTABLE_PB` does not exist OR `source_mod_time` is more recent than `executable_mod_time`:
-                i.   INFO "CPI_EXECUTABLE_PB is missing or outdated. System will regenerate."
-                ii.  (System Action) Convert `CPI_SOURCE_MD` to `CPI_INTERMEDIATE_JSON`. If fails, CRITICAL ERROR & HALT.
-                iii. (System Action) Convert `CPI_INTERMEDIATE_JSON` to `CPI_EXECUTABLE_PB`. If fails, CRITICAL ERROR & HALT.
-                iv.  INFO "CPI_EXECUTABLE_PB successfully regenerated."
-            d.  Else: INFO "CPI_EXECUTABLE_PB is current."
-    C. **Execution Directive (System Level):**
-        1.  INFO "System loading Core Planning Instructions from CPI_EXECUTABLE_PB."
-        2.  The AI system MUST now load and process all subsequent Core Planning Instructions (SECTION I onwards) from `CPI_EXECUTABLE_PB`.
+
+// **0. CPI BOOTSTRAP & EXECUTION DIRECTIVE:**Add commentMore actions
+//    A. **Source and Executable Definition:**
+//        1.  This document, `core_planning_instructions.txt` (hereafter `CPI_SOURCE_TXT`), is the definitive human-readable source for Core Planning Instructions. (Path dynamically determined by system).
+//        // 2.  The primary executable format for these instructions is `core_planning_instructions.pb` (hereafter `CPI_EXECUTABLE_PB`), located in the same directory as `CPI_SOURCE_TXT`.
+//        // 3.  An intermediate JSON representation, `core_planning_instructions.json` (hereafter `CPI_INTERMEDIATE_JSON`), is used during conversion, located in the same directory.
+//    B. **Executable CPI Management Protocol:**
+//        1.  **Objective:** Ensure the AI executes using the most up-to-date `CPI_SOURCE_TXT` for this test. // Modified from original for clarity during this test.
+//        // 2.  **Procedure (System Level - before parsing Section I onwards from .pb):**
+//        //     a.  Let `source_mod_time` be the last modification timestamp of `CPI_SOURCE_TXT`.
+//        //     b.  Let `executable_mod_time` be the last modification timestamp of `CPI_EXECUTABLE_PB`.
+//        //     c.  **Condition Check:** IF `CPI_EXECUTABLE_PB` does not exist OR `source_mod_time` is more recent than `executable_mod_time`:
+//        //         i.   INFO "CPI_EXECUTABLE_PB is missing or outdated. System will regenerate."
+//        //         ii.  (System Action) Convert `CPI_SOURCE_TXT` to `CPI_INTERMEDIATE_JSON`. If fails, CRITICAL ERROR & HALT.
+//        //         iii. (System Action) Convert `CPI_INTERMEDIATE_JSON` to `CPI_EXECUTABLE_PB`. If fails, CRITICAL ERROR & HALT.
+//        //         iv.  INFO "CPI_EXECUTABLE_PB successfully regenerated."
+//        //     d.  Else: INFO "CPI_EXECUTABLE_PB is current."
+//    C. **Execution Directive (System Level - Modified for Text Execution Test):**
+//        1.  INFO "System loading Core Planning Instructions directly from CPI_SOURCE_TXT for testing."
+//        2.  The AI system MUST now load and process all Core Planning Instructions (SECTION I onwards) directly from this `CPI_SOURCE_TXT` file.
+// ---
+
+// Execution begins directly with SECTION I for this version.
 
 ---
 // The following sections are processed from core_planning_instructions.pb
