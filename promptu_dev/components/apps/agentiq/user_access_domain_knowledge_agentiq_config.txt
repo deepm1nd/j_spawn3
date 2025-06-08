@@ -1,0 +1,7 @@
+# User Configuration for Agentiq: Access Domain Knowledge
+# Add parameters here, e.g.:
+# Parameter: domain_id
+# Requirement: Required
+# DefaultType: Placeholder
+# Description: The ID of the domain to access (e.g., ai_agents_and_context).
+# Default: [Specify Domain ID]

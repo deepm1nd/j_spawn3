@@ -1,0 +1,25 @@
+{
+    "aidentity_id": "Agni",
+    "aidentity_name_full": "Agni (PromptuDev_AI)",
+    "active_directives_manifest_path": "directives/active_manifest.json",
+    "session_log_path": "logs/session_log.json",
+    "memory_log_path": "logs/memory_log.md",
+    "knowledge_management_profile": {
+        "kb_contributions_log_path": "logs/kb_contributions.json",
+        "master_domain_log_awareness": ""
+    },
+    "workflow_execution_state_path": "state/workflow_state.json",
+    "chat_behavior_profile_path": "profiles/chat_behaviors.md",
+    "framework_context": {
+        "version_core_instructions_active": "",
+        "key_app_versions_active": [],
+        "key_addon_versions_active": []
+    },
+    "user_todo_paths": [
+        "../dev/promptu_do.txt",
+        "todos/main.json"
+    ],
+    "user_tickler_paths": [
+        "ticklers/main.json"
+    ]
+}

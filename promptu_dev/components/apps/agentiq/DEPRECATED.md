@@ -1,0 +1,1 @@
+This PromptApp ('agentiq') is deprecated as of 2025-06-07. Its conceptual functionalities are largely covered by the Main AI (Agni) core capabilities or are planned as separate, focused add-ons if deemed necessary. It will not be refactored for the new hierarchical handoff mechanism.

@@ -1,0 +1,80 @@
+{
+  "promptAppDisplayName": "Agentiq Framework Orchestrator",
+  "description": "Manages the Agentiq Frame of Reference (FoR) for enhanced AI operation, including memory, rules, workflows, chat behaviors, and domain knowledge.",
+  "phases": [
+    {
+      "phaseName": "Initialization & Configuration",
+      "tasks": [
+        {
+          "taskName": "Initialize Agentiq Session",
+          "description": "Loads essential configurations, reviews handoff notes, and prepares the Agentiq FoR for the current session.",
+          "componentName": "init_session_agentiq",
+          "isIterable": false
+        },
+        {
+          "taskName": "Load Active Directives",
+          "description": "Loads and applies operational rules, guidelines, and preferences based on the active Directives Manifest.",
+          "componentName": "load_directives_agentiq",
+          "isIterable": false
+        },
+        {
+          "taskName": "Load Chat Protocols",
+          "description": "Loads chat behavior guidelines to inform interaction style.",
+          "componentName": "load_chat_protocols_agentiq",
+          "isIterable": false
+        }
+      ]
+    },
+    {
+      "phaseName": "Knowledge & Context Management",
+      "tasks": [
+        {
+          "taskName": "Access Domain Knowledge",
+          "description": "Retrieves and processes information from specified SME knowledge files, reference files, or the Master Domain Log.",
+          "componentName": "access_domain_knowledge_agentiq",
+          "isIterable": true
+        },
+        {
+          "taskName": "Manage Memory Log",
+          "description": "Accesses or updates the long-term memory log with significant events or learnings.",
+          "componentName": "manage_memory_log_agentiq",
+          "isIterable": true
+        }
+      ]
+    },
+    {
+      "phaseName": "Task & Workflow Execution",
+      "tasks": [
+        {
+          "taskName": "Execute Ad-hoc Task with FoR",
+          "description": "Executes a user-defined task, applying Agentiq's rules, context, and knowledge.",
+          "componentName": "execute_adhoc_task_agentiq",
+          "isIterable": true
+        },
+        {
+          "taskName": "Execute Predefined Workflow",
+          "description": "Executes a named, predefined workflow composed of multiple sub-tasks, managed by Agentiq.",
+          "componentName": "execute_workflow_agentiq",
+          "isIterable": true
+        }
+      ]
+    },
+    {
+      "phaseName": "Session Review & Evolution",
+      "tasks": [
+        {
+          "taskName": "Agentiq Self-Reflection",
+          "description": "Reviews session activities, identifies potential improvements to its FoR (rules, knowledge, workflows), and suggests updates.",
+          "componentName": "self_reflection_agentiq",
+          "isIterable": false
+        },
+        {
+          "taskName": "Prepare Handoff Notes",
+          "description": "Generates comprehensive handoff notes for the next Agentiq session, summarizing key learnings and context.",
+          "componentName": "prepare_handoff_agentiq",
+          "isIterable": false
+        }
+      ]
+    }
+  ]
+}

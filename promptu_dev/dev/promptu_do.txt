@@ -1,0 +1,47 @@
+# Promptu Framework - Todo List
+
+## Meta & Core Instructions
+-   [ ] **Address Handoff Note Crash Resilience:** Investigate and propose solutions for ensuring handoff note summaries (from `handoff_notes.md`) are not lost due to unexpected session crashes occurring before the final handoff commit. Consider mechanisms like more frequent intermediate handoff commits or AI-initiated checkpoints.
+-   [ ] **Review Core Instructions Reorganization Options:** Review the report `/promptu_dev/meta/ai_context_categories.md` (which outlines Options A, B, and C for restructuring `core_planning_instructions.txt`) and select a preferred option for potential implementation.
+-   [ ] **Review Directive Management Proposals:** Review the document `/promptu_dev/meta/operating_rules_management_proposal.txt` (which details Proposals A, B, and C for file-based/dynamic directive management) and decide on a strategic direction (e.g., proceed with implementing Proposal C).
+-   [ ] **Develop System for Complex Shorthands:** Consider and suggest a pattern/system to allow for more complex communication shorthands beyond the initial set defined in `core_planning_instructions.txt` Section V.B.
+-   [ ] **Apply New Document Formatting Guideline (B.10) to Existing Meta-Documents:**
+    -   [ ] Revise `/promptu_dev/meta/ai_context_categories.md` to adhere to Guideline B.10 (multilevel numerical headings, descriptive titles/headings).
+    -   [ ] Revise `/promptu_dev/meta/operating_rules_management_proposal.txt` to adhere to Guideline B.10.
+
+## Component & Feature Development
+*(Placeholder for future component-specific or feature-specific todos)*
+
+## Bugs & Issues
+*(Placeholder for future bug/issue tracking)*
+
+---
+Date: 2025-06-05
+User Requested: Capture future framework enhancements.
+
+*   **TODO:** Framework Enhancement: Define and implement new communication shorthand 'SH: SideTask: [description]' for batching user-designated tasks for future execution (including save to list & reminder mechanism). Consider adding to Section V.B of `promptu/core/core_planning_instructions.txt`.
+*   **TODO:** Framework Enhancement: Design and implement universal 'batch task processing' behavior, available as a core directive or easily reusable component for all new Promptu apps. This should allow an AI to receive, organize, and efficiently execute groups of tasks. Explore implications for `core_planning_instructions.txt` and potential for a core utility/add-on.
+---
+
+---
+Date: 2025-06-05
+User Requested: Add self-reflexive todo for new AI behavior.
+
+*   **TODO:** Jules (AI Agent): Actively implement and follow the new 'Automatic Todo Detection' Guideline (IV.B.13) during Developer Mode sessions.
+---
+
+---
+Date: 2025-06-05
+User Requested: Add guideline for handling unprocessable files in research.
+
+*   **TODO:** Research Task Guideline: Ensure that if research tasks encounter unprocessable but potentially useful file formats (e.g., images, videos) in sources, these sources are logged in a relevant `_refs.md` file for future reference or manual review.
+---
+
+---
+Date: 2025-06-05
+User Requested: Defer KB indexing investigation until more KB content is available.
+
+*   **TODO:** Return to KB indexing investigation (research report `promptu_dev/research/kb_indexing_research_report.md` is complete) after a reasonable amount of diverse KB content has been amassed to provide a better basis for PoC and implementation decisions. Note: User indicated indexing itself might be an 'external' process to Promptu's direct execution.
+---
+
+- [ ] **Strategy/Discussion:** Revisit `pre_promptu.txt` role and its interaction with the enhanced component handoff/resumption mechanism. Discuss after initial component refactoring for `dev_planner` and `create_research_report` is complete, and before finalizing strategy for app-specific internal components and utils.

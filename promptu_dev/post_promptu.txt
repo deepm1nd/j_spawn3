@@ -1,0 +1,4 @@
+// This file is deprecated as of 2025-06-08.
+// Its functionality has been merged into `promptu_dev/promptu.txt`
+// and `promptu_dev/core/core_planning_instructions.md`.
+// Please refer to those files for the current AIdentity and CPI logic.

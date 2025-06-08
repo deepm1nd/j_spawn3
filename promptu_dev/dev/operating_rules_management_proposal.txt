@@ -1,0 +1,99 @@
+# Proposal for Enhanced Management of File Storage Preferences and Operational Directives
+
+## 1. Introduction
+
+This document outlines proposals discussed for enhancing the management of file storage preferences and the lifecycle of operational directives (Rules, Guidelines, Preferences) within the Promptu framework. It originated from discussions on standardizing file placement and evolving framework directives. The purpose is to capture these ideas for future review and potential implementation.
+
+## 2. Favored Approach: Proposal C - Dynamic Activation of Selected Directives via a Manifest
+
+### 2.1. Concept
+Operational Rules, Guidelines, and Preferences are maintained as individual, self-contained definition files within structured "library" directories (`ops` folders). A separate "Directives Manifest" file specifies which of these library files are loaded and considered active for the current AI session. This allows users to create and switch between different "packages" of directives tailored for specific tasks (e.g., writing, research, learning).
+
+### 2.2. Details
+
+#### 2.2.1. Directive Libraries (Repositories)
+*   **Locations:**
+    *   User Mode Libraries: `/promptu/ops/rules/`, `/promptu/ops/guidelines/`, `/promptu/ops/preferences/`
+    *   Developer Mode Libraries: `/promptu_dev/meta/ops/rules/`, `/promptu_dev/meta/ops/guidelines/`, `/promptu_dev/meta/ops/preferences/`
+*   **Content:** Each directory contains individual files. Each file is a complete, self-contained definition of a single Rule, Guideline, or Preference.
+*   **File Format:** A consistent, parsable format is essential (e.g., Markdown with YAML frontmatter for a unique ID, title, version, and the directive content; or structured JSON/YAML). Each directive file **MUST** possess a unique identifier (ID) across the entire ecosystem of potential directives.
+
+#### 2.2.2. Directives Manifest File (Activation List)
+*   **Purpose:** Explicitly lists the unique IDs of all directive files (from the libraries) that should be considered active for the current session.
+*   **Location:** The primary manifest could be project-specific (e.g., `[PROJECT_ROOT]/.promptu/active_directives.json` or `.md`) and potentially fall back to a user-global or system-default manifest if not found. The exact lookup order needs definition.
+*   **Format:** A simple list of unique directive IDs (e.g., a JSON array of strings, or a text file with one ID per line).
+
+#### 2.2.3. Core Framework (`promptu/core/core_planning_instructions.txt`) Modifications
+*   Section IV ("Operational Directives & Self-Correction") would be significantly refactored.
+*   It would need to retain only the most fundamental, immutable directives (e.g., the rule on how to modify `core_planning_instructions.txt` itself; instructions for security, privacy; the instructions for locating and processing the Directives Manifest).
+*   New meta-instructions would be added to:
+    1.  Locate and parse the active Directives Manifest file.
+    2.  For each directive ID listed in the manifest:
+        a.  Search the configured library paths (User or Developer mode as appropriate, potentially allowing search order definition) to find the corresponding directive definition file.
+        b.  Load and parse this file.
+        c.  Apply/enforce it as an active directive for the session.
+    3.  Define behavior for:
+        a.  Missing directive files (listed in manifest but not found in libraries).
+        b.  Malformed directive files.
+        c.  Potential conflicts if multiple loaded directives attempt to govern the same behavior without a clear precedence (though unique IDs and modular design should minimize this).
+        d.  Order of application if it matters for certain types of directives.
+
+#### 2.2.4. Management of Storage Preferences
+*   Active storage preference files (e.g., `storage_conventions.md`) would also be managed as individual files within the `.../ops/preferences/` libraries.
+*   They would be activated by being listed in the Directives Manifest for the session.
+*   Project-specific storage preferences could either be a specially-named file that's always loaded if present (e.g., `[PROJECT_ROOT]/.promptu/storage_preferences.md`) or also be a library item activated via the manifest. The former might be simpler for this specific common case.
+
+### 2.3. Benefits of Proposal C
+*   **High Modularity:** Directives are individual, manageable files.
+*   **User-Configurable "Packages":** Users can easily create different sets of active directives for various tasks (e.g., a "research_mode_directives.json" manifest vs. a "coding_mode_directives.json" manifest) by simply changing which directives are listed in their active manifest.
+*   **Clear Separation:** Definitions of most directives are separated from the core framework's bootstrapping logic.
+*   **Easier Sharing:** Individual directive files or collections of them (along with a manifest) can be shared among users.
+*   **Reduced Core File Bloat:** `core_planning_instructions.txt` becomes leaner.
+
+### 2.4. Considerations for Proposal C
+*   **Implementation Effort:** This is a significant architectural change requiring careful design of the directive file format, manifest format, and loading/parsing/application logic within the AI.
+*   **Robustness:** The AI's ability to handle missing or malformed directive files/manifests is critical.
+*   **Conflict Resolution:** While modularity should reduce conflicts, a strategy for handling any that arise (e.g., two active rules affecting the same thing) would be needed if not designed out.
+*   **Initial Setup:** Requires creating the library structure and populating it with initial directive files.
+*   **Discoverability:** How users discover available directives in the libraries to add to their manifests.
+
+## 3. Alternative Approaches Considered
+
+### 3.1. Proposal A: Guideline-Driven Management with Centralized Core Directives
+
+#### 3.1.1. Concept
+`core_planning_instructions.txt` remains the single source of truth for *active* Rules, Guidelines, and Preferences. The `ops` folders serve two roles:
+1.  `/promptu/.../ops/preferences/` holds active, consultable preference files (like `storage_conventions.md`) as directed by a core Guideline.
+2.  `/promptu/.../ops/rules/`, `/promptu/.../ops/guidelines/`, and `/promptu/.../ops/preferences/` (for IV.C Preferences) also serve as locations for users to place *proposals* for new directives. An AI would review these proposals and, if suitable, guide the user through the formal process of editing `core_planning_instructions.txt` to integrate them.
+
+#### 3.1.2. Pros
+*   Strong central governance; clear, audited change process for core directives.
+
+#### 3.1.3. Cons
+*   Less flexible for quickly changing directive sets; `core_planning_instructions.txt` can become very large.
+
+### 3.2. Proposal B: File-System as All-Active Source of Truth
+
+#### 3.2.1. Concept
+All files found in the `ops` subdirectories for rules, guidelines, and preferences are *automatically considered active and dynamically loaded* by the AI at the start of a session. `core_planning_instructions.txt` would primarily bootstrap this loading process.
+
+#### 3.2.2. Pros
+*   Very dynamic; adding/removing directives is just a file operation.
+
+#### 3.2.3. Cons
+*   Potential for unintended activation of directives; complexity in managing order and conflicts without a manifest system; less explicit control over the "active set" for a given session compared to Proposal C.
+
+## 4. General Considerations (Applicable to all proposals)
+
+### 4.1. File Formats
+A clear, consistent, and AI-parsable format for any externalized preference or directive files (whether active or proposals) is crucial. Markdown with YAML frontmatter, or pure JSON/YAML, are strong candidates. The format must be easily parsable by the AI.
+
+### 4.2. User Interface/Interaction
+How users create, manage, and activate these files/directives needs thought. AI assistance in these tasks would be valuable.
+
+### 4.3. Bootstrap Integrity
+The very core instructions in `core_planning_instructions.txt` that define how any external directives or preferences are loaded, interpreted, and managed must be robust and carefully protected.
+
+## 5. Conclusion
+
+Proposal C (Dynamic Activation of Selected Directives via a Manifest) appears to be the most promising direction, offering a powerful balance of flexibility, modularity, and user control for managing operational directives. It directly addresses the user's desire for "Packages of rules for different uses." While it represents a more significant implementation effort than Proposal A, its long-term benefits for a highly configurable and adaptable Promptu framework seem substantial. Proposal A remains a viable, more conservative alternative. Proposal B is likely too implicit for robust operation.

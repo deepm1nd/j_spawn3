@@ -1,0 +1,87 @@
+[[USER_CONFIG_FOR_dev_planner]]
+# Requirement: Optional | DefaultType: Placeholder
+# Description: Name of the overall project. Used for context or default output folder naming if BASE_OUTPUT_PATH is not fully specific.
+# Default: MyProject
+PROJECT_NAME: [USER_VALUE_START] MyProject [USER_VALUE_END]
+
+# Requirement: Optional | DefaultType: Placeholder
+# Description: Identifier for the current iteration or run. Similar contextual use.
+# Default: Iter_01
+ITERATION_ID: [USER_VALUE_START] Iter_01 [USER_VALUE_END]
+
+# Requirement: Optional | DefaultType: Accepted
+# Description: Specifies the planning and execution workflow.
+#              "Monolithic": Dev_planner creates the full detailed plan, then spawns developer Task AIs.
+#              "DelegatedPlanning": Dev_planner outlines planning tasks, spawns Planning Task AIs, waits for merged plan, then spawns Developer Task AIs.
+#              "HybridIterative": Dev_planner plans and spawns planner/developer pairs iteratively by phase/module.
+# Default: Monolithic
+WORKFLOW_TYPE: [USER_VALUE_START] Monolithic [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Placeholder
+# Description: User-defined base directory for all outputs from this specific invocation of task_spawning_addon (e.g., outputs/MyProject/DevPhase_Run01/). This path should be relative to the repository root or absolute. Note: To ensure shared KB outputs from research tasks (configured by `dev_planner` using relative paths like `../../kb/`) are placed correctly in the mode-appropriate top-level 'kb' folder (e.g., `promptu/kb/` or `promptu_dev/kb/`), this `BASE_OUTPUT_PATH` should be structured accordingly (e.g., `promptu/my_project_outputs/run1/` or `promptu_dev/my_project_outputs/run1/`, typically two levels below the mode root if `dev_planner` uses `../../kb/` internally for research outputs).
+# Default: outputs/default_spawn_run/
+BASE_OUTPUT_PATH: [USER_VALUE_START] outputs/default_spawn_run/ [USER_VALUE_END]
+
+# Requirement: Optional | DefaultType: Placeholder
+# Description: Path to a directory containing documents, notes, or other materials that provide foundational concepts and ideas. The `dev_planner` will use these as a basis for in-depth research to inform the planning phase and the final development plan. Content from this directory helps shape the breadth and depth of investigation.
+# Default: [Path to directory with input concept documents or N/A]
+PLANNING_INPUT_CONCEPTS_DIR: [USER_VALUE_START] [Path to directory with input concept documents or N/A] [USER_VALUE_END]
+
+# Requirement: Optional | DefaultType: Placeholder
+# Description: Path to a primary specification document or a directory containing guiding specifications, requirements, and constraints. This input is treated as the single source of truth for architectural decisions, COTS/FOSS selection, task breakdown, and implementation details within the generated development plan. All plan elements should align with these specifications. Accepts a comma-separated list of repository paths or URLs.
+# Default: [Comma-separated paths/URLs to project specifications or N/A]
+PROJECT_SPECIFICATIONS_REF: [USER_VALUE_START] [Comma-separated paths/URLs to project specifications or N/A] [USER_VALUE_END]
+
+# Requirement: Optional | DefaultType: Placeholder
+# Description: Path to a single document (e.g., Markdown) containing the user's initial plan proposal (must define at least 1 phase and 1 task). If empty or not provided, dev_planner (guided by PromptuDev_AI) proceeds based on WORKFLOW_TYPE and its own independent analysis of project specifications.
+# Default: [Path to user plan proposal document or N/A]
+USER_PLAN_PROPOSAL_PATH: [USER_VALUE_START] [Path to user plan proposal document or N/A] [USER_VALUE_END]
+
+# Requirement: Optional | DefaultType: Placeholder
+# Description: Comma-separated list of repository paths or URLs to documents that provide guidance on how specific planning aspects should be implemented (e.g., document management plans, change management plans, style guides, process guides).
+# Default: [Comma-separated paths/URLs to methodology guides or N/A]
+PLAN_METHODOLOGY_GUIDES: [USER_VALUE_START] [Comma-separated paths/URLs to methodology guides or N/A] [USER_VALUE_END]
+
+# Requirement: Optional | DefaultType: Placeholder
+# Description: Comma-separated list of file paths or URLs to exemplar documents (e.g., sample plan sections, technical deep-dives). These illustrate the desired level of detail, depth of technical content, and the style for representing elements like code snippets and data structures *within the generated development plan documents*.
+# Default: [Comma-separated file paths/URLs to exemplar documents or N/A]
+PLAN_EXEMPLAR_REFS: [USER_VALUE_START] [Comma-separated file paths/URLs to exemplar documents or N/A] [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Accepted
+# Description: Filename for the main overview/manifest document (e.g., main_dev_plan_overview.md). This document will list and link to the individual submodule development plans which collectively form the main development plan. It is saved directly under BASE_OUTPUT_PATH.
+# Default: main_development_plan.md
+MAIN_DEV_PLAN_FILENAME: [USER_VALUE_START] main_development_plan.md [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Accepted
+# Description: Subdirectory name (relative to BASE_OUTPUT_PATH) where the Task Launch Plan (00_task_launch_plan.md) and individual task prompt files (.txt) will be saved. The IPC directory (ipc/) for these tasks will be created inside this subdirectory.
+# Default: planning_files
+TASK_PROMPTS_SUBDIR: [USER_VALUE_START] planning_files [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Accepted
+# Description: Subdirectory name (relative to BASE_OUTPUT_PATH) for dev_plan.md and next_steps.md files generated by Task AIs.
+# Default: task_execution_plans
+SUBMODULE_PLANS_SUBDIR: [USER_VALUE_START] task_execution_plans [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Accepted
+# Description: Subdirectory name (relative to BASE_OUTPUT_PATH) for the actual deliverables and new files created by Task AIs.
+# Default: task_output_artifacts
+TASK_ARTIFACTS_SUBDIR: [USER_VALUE_START] task_output_artifacts [USER_VALUE_END]
+
+# Requirement: Optional | DefaultType: Placeholder
+# Description: OPERATIONAL PARAMETER - Unique instance ID for this execution of dev_planner, typically provided by the invoking Main AI (Agni). Used for managing dedicated handoff notes and enabling resumption. If not provided, dev_planner may operate in a non-resumable mode or generate a temporary ID for a single run if its internal logic supports it.
+# Default: [Not Set - Provided by Invoker]
+COMPONENT_INSTANCE_ID: [USER_VALUE_START] [Not Set - Provided by Invoker] [USER_VALUE_END]
+
+
+# Requirement: Optional | DefaultType: Placeholder
+# Description: OPERATIONAL PARAMETER - Unique instance ID for this execution of dev_planner, typically provided by the invoking Main AI (Agni). Used for managing dedicated handoff notes and enabling resumption. If not provided, dev_planner may operate in a non-resumable mode or generate a temporary ID for a single run if its internal logic supports it.
+# Default: [Not Set - Provided by Invoker]
+COMPONENT_INSTANCE_ID: [USER_VALUE_START] [Not Set - Provided by Invoker] [USER_VALUE_END]
+
+
+# Requirement: Optional | DefaultType: Placeholder
+# Description: OPERATIONAL PARAMETER - Unique instance ID for this execution of dev_planner, typically provided by the invoking Main AI (Agni). Used for managing dedicated handoff notes and enabling resumption. If not provided, dev_planner may operate in a non-resumable mode or generate a temporary ID for a single run if its internal logic supports it.
+# Default: [Not Set - Provided by Invoker]
+COMPONENT_INSTANCE_ID: [USER_VALUE_START] [Not Set - Provided by Invoker] [USER_VALUE_END]
+
+[[END_USER_CONFIG_FOR_dev_planner]]

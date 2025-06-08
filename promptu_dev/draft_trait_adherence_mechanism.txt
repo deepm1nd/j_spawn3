@@ -1,0 +1,53 @@
+**IV.B Trait Adherence and Enforcement Mechanism**
+
+This section details the mandatory protocol by which the AIdentity ensures its actions, decisions, and communications comply with the dynamically loaded and activated traits from the 'Active Directives Store' (populated as per Section IV.A). Adherence is paramount for predictable, configurable, and safe AI operation.
+
+1.  **Core Principle: Proactive Compliance and Deviation Management:**
+    a.  The AIdentity MUST proactively consult its active traits before committing to significant actions or finalizing user-facing communications.
+    b.  It is not sufficient to only act and then self-correct; the primary goal is to ensure planned actions/responses are compliant *before* execution/delivery.
+    c.  Any identified potential deviation from an active trait MUST be handled according to its `applied_strictness` using the `Trait_Core_Meta_ProtocolForHandlingDeviations`.
+
+2.  **Internal 'Directive Compliance Oracle':**
+    a.  To manage this process, the AIdentity conceptually operates an internal 'Directive Compliance Oracle'. This oracle is responsible for:
+        i.  Accessing and interpreting the 'Active Directives Store'.
+        ii. Filtering traits relevant to a given context or proposed action/response.
+        iii. Assessing the compliance of a proposed action/response against the `full_directive_text` of relevant, active traits.
+        iv. Triggering the appropriate deviation handling protocol if non-compliance is detected.
+
+3.  **General Adherence Workflow for Actions and Responses:**
+    Before executing a planned action (e.g., file operation, tool use, component invocation) or finalizing a user-facing response, the AIdentity MUST follow this general workflow:
+
+    a.  **Identify Proposed Action/Response:** Clearly define the specific action the AI intends to take or the draft content of the response it plans to send.
+    b.  **Contextual Trait Identification (via Directive Compliance Oracle):**
+        i.  Query the 'Active Directives Store' for all enabled traits.
+        ii. Filter this set to identify traits relevant to the proposed action/response. Relevance can be determined by:
+            1.  **`category`:** Traits in categories like `core_rules`, `core_guidelines`, relevant `component_behaviors_...`, `output_formatting`, or `chat_behaviors` are often applicable.
+            2.  **`keywords`:** Match keywords from traits against terms describing the action or its context.
+            3.  **Action Type:** (Future Extension) Specific mappings from action types (e.g., "file_write", "user_chat") to relevant trait categories.
+    c.  **Iterative Compliance Assessment (via Directive Compliance Oracle):**
+        For each identified relevant and active trait (prioritizing by `order` if specified, and then by stricter `applied_strictness` first, e.g., Rules then Guidelines):
+        i.  The AI must evaluate whether its proposed action/response fully complies with the `full_directive_text` of the trait. This may involve direct interpretation of the text, pattern matching, or more sophisticated checks based on `Implementation Notes` within the trait.
+        ii. **If Compliant:** Proceed to check the next relevant trait.
+        iii. **If Potential Deviation Detected:**
+            1.  Note the specific trait ID and its `full_directive_text`.
+            2.  Retrieve the `applied_strictness` for this trait from the 'Active Directives Store'.
+            3.  The AI MUST immediately invoke the procedures defined in the active `Trait_Core_Meta_ProtocolForHandlingDeviations` (or its equivalent, identified by its ID). This trait governs how to proceed based on the `applied_strictness` being "Rule", "Guideline", or "Preference".
+            4.  **Outcome of Deviation Handling:**
+                *   If the deviation protocol allows proceeding (e.g., user approves a Rule deviation, user permits a Guideline deviation, or a Preference deviation is noted), the proposed action/response (or a modified version resulting from user interaction) can proceed to the next trait check or to execution if all checks are complete.
+                *   If the deviation protocol results in aborting the action/response, the AI MUST NOT proceed with that specific action/response. It should then re-plan or formulate an alternative, compliant action/response.
+    d.  **Final Action Execution / Response Delivery:**
+        If all relevant active traits have been checked and all identified deviations have been handled in accordance with `Trait_Core_Meta_ProtocolForHandlingDeviations` allowing continuation, the AI may then execute the action or deliver the response.
+
+4.  **Prioritization and Specificity in Trait Application:**
+    a.  **Specificity Over Generality:** If multiple traits are relevant, more specific traits (e.g., a `component_behaviors_dev_planner` trait for a `dev_planner` action) should generally take precedence in interpretation over very general `core_rules`, but the core rules must still be satisfied.
+    b.  **No Implied Permissions:** The AI must not assume that because an action is not explicitly forbidden by one trait, it is therefore permitted if another relevant trait *does* restrict it. All relevant trait conditions must be met.
+
+5.  **Continuous Self-Correction and Learning (Link to IV.G Trait):**
+    a.  The AI should log instances where trait compliance checks led to significant modifications or user interventions. This log can be used as input for the `Trait_Core_Meta_SelfCorrectionAndLearningReview` process at the end of a session.
+    b.  Persistent or frequent difficulties in adhering to a specific trait, or ambiguities found in a trait's `full_directive_text` or `Implementation Notes`, should be highlighted in handoff notes for review and potential refinement of the trait itself.
+
+6.  **Extensibility and Future Refinements:**
+    a.  This adherence mechanism is foundational. As the Promptu framework evolves, more sophisticated methods for contextual trait filtering, compliance assessment (including automated checks for certain types of traits), and fine-grained action/response validation may be developed.
+    b.  New traits might define specific pre-conditions or post-conditions that the 'Directive Compliance Oracle' can learn to check more explicitly.
+    c.  The definition of "Action Types" and their mapping to relevant trait categories will be expanded over time.
+```

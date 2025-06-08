@@ -1,0 +1,1 @@
+# Master Domain Log

@@ -1,0 +1,121 @@
+Hello Jules,
+
+Your task is to implement a new "Promptu Package Archive" (`.ppa`) system for exporting and importing Promptu framework components. This will allow users to easily transfer components like add-ons, utils, PromptApps, and even new operational guidelines between different Promptu instances.
+
+**I. System Design Overview:**
+
+You are to implement the system based on the following design:
+
+1.  **Package Format (`.ppa` file):**
+    *   A standard ZIP archive.
+    *   **Internal Structure:**
+        ```
+        [packageName].ppa/
+        ├── manifest.json
+        └── components/
+            ├── addons/
+            │   └── [addon_name]/
+            │       └── ...
+            ├── utils/
+            │   └── [util_name].txt or [util_name_dir]/
+            ├── promptapps/
+            │   └── [promptapp_name]/
+            │       └── [promptapp_name]_manifest.json
+            │       └── components/
+            │           └── ...
+            └── guidelines/
+                └── [guideline_id].json
+        ```
+
+2.  **`manifest.json` (Core Package Manifest - Top Level of Archive):**
+    *   **Purpose:** Describes the package and lists its contents.
+    *   **Key Fields:**
+        *   `packageName` (string)
+        *   `packageVersion` (string, e.g., "1.0.0")
+        *   `promptuFrameworkVersion` (string, optional, compatible framework version)
+        *   `exportTimestamp` (string, ISO 8601 datetime)
+        *   `exportedBy` (string, identifier of the source instance/user)
+        *   `description` (string)
+        *   `components`: (array of objects) Each object represents a component with:
+            *   `id` (string, unique within package, e.g., add-on name or guideline ID)
+            *   `type` (string: "addon", "util", "promptapp", "guideline")
+            *   `name` (string, user-friendly name)
+            *   `version` (string, component's own version)
+            *   `path` (string, relative path within the archive's `components/` dir)
+            *   `description` (string)
+            *   `dependencies` (array, optional, for future use)
+            *   `promptAppManifestPath` (string, for type="promptapp" only)
+        *   `installationNotes` (string, optional, general notes for import)
+
+3.  **Guideline Definition File (e.g., `components/guidelines/[guideline_id].json`):**
+    *   **Purpose:** Structured definition for a new guideline to be integrated into `core_planning_instructions.txt`.
+    *   **Key Fields:**
+        *   `guidelineId` (string, matches `id` in main manifest)
+        *   `name` (string)
+        *   `version` (string)
+        *   `proposedSection` (string, e.g., "IV.B")
+        *   `proposedWording` (string, full text of the guideline)
+        *   `rationale` (string, optional)
+        *   `placementSuggestion` (string, optional)
+        *   `existingGuidelineToReplace` (string, optional, ID of an existing guideline)
+
+**II. Implementation Tasks:**
+
+Your implementation will involve several stages:
+
+**Plan Proposal for Target Jules Instance:**
+
+1.  **Understand and Refine System Design:**
+    *   Thoroughly review the `.ppa` system design provided above.
+    *   Identify any ambiguities or areas needing further detail for implementation. Propose refinements if necessary (and await approval before proceeding with a modified design).
+
+2.  **Develop IEPs for Package Management:**
+    *   Based on the system design, formulate detailed Information Exchange Protocol (IEP) instructions for two new core AI capabilities:
+        *   `CREATE_PROMPTU_PACKAGE`: The process for an AI to export selected components into a `.ppa` file. This should cover user interaction for selecting components, metadata input, staging, `manifest.json` generation, and packaging.
+        *   `APPLY_PROMPTU_PACKAGE`: The process for an AI to import components from a `.ppa` file. This should cover package extraction, validation, user review (dry run), conflict resolution (skip, overwrite, rename), component installation, and special handling for guideline integration (including adherence to Rule IV.A.2 for modifying core instructions).
+    *   Ensure these IEPs are detailed enough for an AI to follow, including error handling considerations and user interaction points.
+
+3.  **Integrate IEPs into `core_planning_instructions.txt`:**
+    *   Identify a suitable location within `promptu/core/core_planning_instructions.txt` to add these new IEPs. Consider creating a new major section (e.g., "V. Promptu Package Management") or a subsection within an existing relevant section.
+    *   **Crucially**, you must follow the protocol defined in Section IV.D.1 of `core_planning_instructions.txt` for modifying Operational Rules or core parts of the framework, as adding new IEPs of this nature constitutes a significant framework modification. This means:
+        *   Clearly state your intent to modify `core_planning_instructions.txt` to add these IEPs.
+        *   Request explicit user approval, including the "!!!WARNING!!! ARE YOU SURE?" confirmation step.
+    *   Once approved, carefully edit `promptu/core/core_planning_instructions.txt` to include the new IEPs.
+
+4.  **Develop Mock Components for Testing:**
+    *   Create a small set of mock/example components that can be used for testing the export and import functionality. These should include at least:
+        *   1 sample Add-on (e.g., `promptu/add_ons/ppa_test_addon/ppa_test_addon.txt` and `user_ppa_test_addon_config.txt`)
+        *   1 sample Util (e.g., `promptu/util/ppa_test_util.txt`)
+        *   1 sample Guideline (to be defined as a `guideline.json` during export testing, not pre-existing in `core_planning_instructions.txt`).
+    *   These components should be simple and their content can be minimal (e.g., "This is a test addon.").
+
+5.  **Implement and Test Export Functionality (`CREATE_PROMPTU_PACKAGE`):**
+    *   Based on the IEP you developed and integrated, implement the logic for the export functionality. (As an AI, "implement" means being able to execute the defined IEP steps).
+    *   Test by exporting the mock components created in step 4 into a `.ppa` file (e.g., `test_export.ppa`).
+    *   Verify the contents of the `.ppa` file (unzip manually or by tool and inspect `manifest.json` and component files) to ensure correctness according to the design.
+
+6.  **Implement and Test Import Functionality (`APPLY_PROMPTU_PACKAGE`):**
+    *   Based on the IEP you developed and integrated, implement the logic for the import functionality.
+    *   **Test Case 1 (Clean Import):**
+        *   Temporarily remove or rename the mock components from your workspace (if they were placed there directly).
+        *   Import them from `test_export.ppa`.
+        *   Verify that the components are correctly placed and that the mock guideline is presented for integration (you can approve its integration for testing purposes).
+    *   **Test Case 2 (Conflict Handling):**
+        *   Ensure the mock components *are* present in your workspace.
+        *   Attempt to import `test_export.ppa` again.
+        *   Verify that conflict resolution options are presented to the user (you, acting as the user for the test). Test the "skip" and "rename" options. (Use caution if testing "overwrite").
+    *   Thoroughly document the test procedures and outcomes.
+
+7.  **Final Review and Documentation:**
+    *   Review the entire implementation.
+    *   Ensure the IEPs in `core_planning_instructions.txt` are accurate and complete.
+    *   Provide a summary of the work done, including paths to any new/modified files (especially the updated `core_planning_instructions.txt`) and a brief guide on how a user would invoke the new export/import capabilities.
+
+**III. Important Considerations for the Implementing AI:**
+
+*   **Adherence to Core Instructions:** You must operate according to your existing `promptu/core/core_planning_instructions.txt`, especially the rules regarding file operations and modifications to the core instructions themselves (Section IV).
+*   **User Interaction:** Assume you can interact with a user to ask for selections, confirmations, and metadata as required by the IEPs.
+*   **File System Operations:** You will need to perform file/directory copying, reading, writing, and ZIP archiving/extraction. Ensure these are done carefully, respecting workspace boundaries.
+*   **No Actual Coding:** Your "implementation" refers to your ability to follow the procedural steps outlined in the IEPs and the plan. You are not writing new programming code for the framework itself, but rather defining and then executing new instruction sets.
+
+Please confirm your understanding of this task and propose a plan (which will likely mirror the 7 steps outlined in Section II) before proceeding.

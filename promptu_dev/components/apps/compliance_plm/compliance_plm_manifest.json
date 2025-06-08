@@ -1,0 +1,221 @@
+{
+  "promptAppDisplayName": "Compliance PLM Workflow",
+  "description": "A multi-phase workflow for managing Product Lifecycle Management with a focus on compliance.",
+  "phases": [
+    {
+      "phaseName": "Concept Phase",
+      "tasks": [
+        {
+          "taskName": "Research",
+          "description": "Conduct initial research for the product concept.",
+          "componentName": "create_research_report",
+          "isIterable": false,
+          "defaultConfigOverrides": {}
+        },
+        {
+          "taskName": "Architectural Specification",
+          "description": "Develop the architectural specification document.",
+          "componentName": "architect",
+          "isIterable": true,
+          "defaultConfigOverrides": {
+            "PROJECT_NAME": "CompliancePLM_ArchSpec",
+            "MAIN_ARCH_SPEC_FILENAME": "Architectural_Specification_Document.md",
+            "WORKFLOW_TYPE": "Monolithic"
+          }
+        },
+        {
+          "taskName": "Product Specification",
+          "description": "Develop the product specification document.",
+          "componentName": "create_research_report",
+          "isIterable": true,
+          "defaultConfigOverrides": {
+            "REPORT_BASENAME": "Product_Specification"
+          }
+        },
+        {
+          "taskName": "Product Requirements",
+          "description": "Define and document product requirements.",
+          "componentName": "create_research_report",
+          "isIterable": true,
+          "defaultConfigOverrides": {
+            "REPORT_BASENAME": "Product_Requirements"
+          }
+        }
+      ]
+    },
+    {
+      "phaseName": "Plan Phase",
+      "tasks": [
+        {
+          "taskName": "Development Planning",
+          "description": "Create the detailed development plan.",
+          "componentName": "dev_planner",
+          "isIterable": false,
+          "defaultConfigOverrides": {
+            "PROJECT_NAME": "CompliancePLM_Development",
+            "MAIN_DEV_PLAN_FILENAME": "Development_Overall_Plan.md",
+            "WORKFLOW_TYPE": "Monolithic",
+            "PLANNING_INPUT_CONCEPTS_DIR": "inputs/concept/research/",
+            "PROJECT_SPECIFICATIONS_REF": "inputs/concept/inputs/placeholder_spec.md",
+            "USER_PLAN_PROPOSAL_PATH": "[Path to user plan proposal document or N/A]",
+            "PLAN_EXEMPLAR_REFS": "inputs/concept/inputs/placeholder_exemplar.md",
+            "PLAN_METHODOLOGY_GUIDES": "inputs/docs/placeholder_guides/"
+          }
+        },
+        {
+          "taskName": "Change Management Planning",
+          "description": "Create the change management plan.",
+          "componentName": "dev_planner",
+          "isIterable": false,
+          "defaultConfigOverrides": {
+            "PROJECT_NAME": "CompliancePLM_ChangeManagement",
+            "MAIN_DEV_PLAN_FILENAME": "Change_Management_Plan.md",
+            "WORKFLOW_TYPE": "Monolithic",
+            "PLANNING_INPUT_CONCEPTS_DIR": "inputs/concept/research/",
+            "PROJECT_SPECIFICATIONS_REF": "inputs/concept/inputs/placeholder_spec.md",
+            "USER_PLAN_PROPOSAL_PATH": "[Path to user plan proposal document or N/A]",
+            "PLAN_EXEMPLAR_REFS": "inputs/concept/inputs/placeholder_exemplar.md",
+            "PLAN_METHODOLOGY_GUIDES": "inputs/docs/placeholder_guides/"
+          }
+        },
+        {
+          "taskName": "Document Management Planning",
+          "description": "Create the document management plan.",
+          "componentName": "dev_planner",
+          "isIterable": false,
+          "defaultConfigOverrides": {
+            "PROJECT_NAME": "CompliancePLM_DocumentManagement",
+            "MAIN_DEV_PLAN_FILENAME": "Document_Management_Plan.md",
+            "WORKFLOW_TYPE": "Monolithic",
+            "PLANNING_INPUT_CONCEPTS_DIR": "inputs/concept/research/",
+            "PROJECT_SPECIFICATIONS_REF": "inputs/concept/inputs/placeholder_spec.md",
+            "USER_PLAN_PROPOSAL_PATH": "[Path to user plan proposal document or N/A]",
+            "PLAN_EXEMPLAR_REFS": "inputs/concept/inputs/placeholder_exemplar.md",
+            "PLAN_METHODOLOGY_GUIDES": "inputs/docs/placeholder_guides/"
+          }
+        },
+        {
+          "taskName": "Requirements Management Planning",
+          "description": "Create the requirements management plan.",
+          "componentName": "dev_planner",
+          "isIterable": false,
+          "defaultConfigOverrides": {
+            "PROJECT_NAME": "CompliancePLM_RequirementsManagement",
+            "MAIN_DEV_PLAN_FILENAME": "Requirements_Management_Plan.md",
+            "WORKFLOW_TYPE": "Monolithic",
+            "PLANNING_INPUT_CONCEPTS_DIR": "inputs/concept/research/",
+            "PROJECT_SPECIFICATIONS_REF": "inputs/concept/inputs/placeholder_spec.md",
+            "USER_PLAN_PROPOSAL_PATH": "[Path to user plan proposal document or N/A]",
+            "PLAN_EXEMPLAR_REFS": "inputs/concept/inputs/placeholder_exemplar.md",
+            "PLAN_METHODOLOGY_GUIDES": "inputs/docs/placeholder_guides/"
+          }
+        },
+        {
+          "taskName": "Safety Planning",
+          "description": "Create the safety plan.",
+          "componentName": "dev_planner",
+          "isIterable": false,
+          "defaultConfigOverrides": {
+            "PROJECT_NAME": "CompliancePLM_Safety",
+            "MAIN_DEV_PLAN_FILENAME": "Safety_Plan.md",
+            "WORKFLOW_TYPE": "Monolithic",
+            "PLANNING_INPUT_CONCEPTS_DIR": "inputs/concept/research/",
+            "PROJECT_SPECIFICATIONS_REF": "inputs/concept/inputs/placeholder_spec.md",
+            "USER_PLAN_PROPOSAL_PATH": "[Path to user plan proposal document or N/A]",
+            "PLAN_EXEMPLAR_REFS": "inputs/concept/inputs/placeholder_exemplar.md",
+            "PLAN_METHODOLOGY_GUIDES": "inputs/docs/placeholder_guides/"
+          }
+        },
+        {
+          "taskName": "CyberSecurity Planning",
+          "description": "Create the cybersecurity plan.",
+          "componentName": "dev_planner",
+          "isIterable": false,
+          "defaultConfigOverrides": {
+            "PROJECT_NAME": "CompliancePLM_CyberSecurity",
+            "MAIN_DEV_PLAN_FILENAME": "CyberSecurity_Plan.md",
+            "WORKFLOW_TYPE": "Monolithic",
+            "PLANNING_INPUT_CONCEPTS_DIR": "inputs/concept/research/",
+            "PROJECT_SPECIFICATIONS_REF": "inputs/concept/inputs/placeholder_spec.md",
+            "USER_PLAN_PROPOSAL_PATH": "[Path to user plan proposal document or N/A]",
+            "PLAN_EXEMPLAR_REFS": "inputs/concept/inputs/placeholder_exemplar.md",
+            "PLAN_METHODOLOGY_GUIDES": "inputs/docs/placeholder_guides/"
+          }
+        }
+      ]
+    },
+    {
+      "phaseName": "Development Phase",
+      "tasks": [
+        {
+          "taskName": "Design",
+          "description": "Execute the design sub-phase of development.",
+          "componentName": "dev_planner",
+          "isIterable": false,
+          "defaultConfigOverrides": {
+            "PROJECT_NAME": "CompliancePLM_Dev_Design",
+            "WORKFLOW_TYPE": "Monolithic",
+            "PLANNING_INPUT_CONCEPTS_DIR": "inputs/concept/research/",
+            "PROJECT_SPECIFICATIONS_REF": "inputs/concept/inputs/placeholder_spec.md",
+            "USER_PLAN_PROPOSAL_PATH": "[Path to user plan proposal document or N/A]",
+            "PLAN_EXEMPLAR_REFS": "inputs/concept/inputs/placeholder_exemplar.md",
+            "PLAN_METHODOLOGY_GUIDES": "inputs/docs/placeholder_guides/"
+          }
+        },
+        {
+          "taskName": "Develop",
+          "description": "Execute the develop sub-phase of development.",
+          "componentName": "dev_planner",
+          "isIterable": false,
+          "defaultConfigOverrides": {
+            "PROJECT_NAME": "CompliancePLM_Dev_Develop",
+            "WORKFLOW_TYPE": "Monolithic",
+            "PLANNING_INPUT_CONCEPTS_DIR": "inputs/concept/research/",
+            "PROJECT_SPECIFICATIONS_REF": "inputs/concept/inputs/placeholder_spec.md",
+            "USER_PLAN_PROPOSAL_PATH": "[Path to user plan proposal document or N/A]",
+            "PLAN_EXEMPLAR_REFS": "inputs/concept/inputs/placeholder_exemplar.md",
+            "PLAN_METHODOLOGY_GUIDES": "inputs/docs/placeholder_guides/"
+          }
+        },
+        {
+          "taskName": "Test",
+          "description": "Execute the test sub-phase of development.",
+          "componentName": "dev_planner",
+          "isIterable": false,
+          "defaultConfigOverrides": {
+            "PROJECT_NAME": "CompliancePLM_Dev_Test",
+            "WORKFLOW_TYPE": "Monolithic",
+            "PLANNING_INPUT_CONCEPTS_DIR": "inputs/concept/research/",
+            "PROJECT_SPECIFICATIONS_REF": "inputs/concept/inputs/placeholder_spec.md",
+            "USER_PLAN_PROPOSAL_PATH": "[Path to user plan proposal document or N/A]",
+            "PLAN_EXEMPLAR_REFS": "inputs/concept/inputs/placeholder_exemplar.md",
+            "PLAN_METHODOLOGY_GUIDES": "inputs/docs/placeholder_guides/"
+          }
+        },
+        {
+          "taskName": "Review",
+          "description": "Execute the review sub-phase of development.",
+          "componentName": "dev_planner",
+          "isIterable": false,
+          "defaultConfigOverrides": {
+            "PROJECT_NAME": "CompliancePLM_Dev_Review",
+            "WORKFLOW_TYPE": "Monolithic",
+            "PLANNING_INPUT_CONCEPTS_DIR": "inputs/concept/research/",
+            "PROJECT_SPECIFICATIONS_REF": "inputs/concept/inputs/placeholder_spec.md",
+            "USER_PLAN_PROPOSAL_PATH": "[Path to user plan proposal document or N/A]",
+            "PLAN_EXEMPLAR_REFS": "inputs/concept/inputs/placeholder_exemplar.md",
+            "PLAN_METHODOLOGY_GUIDES": "inputs/docs/placeholder_guides/"
+          }
+        }
+      ]
+    },
+    {
+      "phaseName": "Release Phase",
+      "tasks": []
+    },
+    {
+      "phaseName": "Retire Phase",
+      "tasks": []
+    }
+  ]
+}

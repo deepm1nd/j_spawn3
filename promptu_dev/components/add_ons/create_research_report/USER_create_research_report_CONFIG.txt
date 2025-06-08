@@ -1,0 +1,78 @@
+[[USER_CONFIG_FOR_create_research_report]]
+# === Core Inputs & Mode ===
+# Requirement: Required (Agentiq task ensures this is non-empty) | DefaultType: Placeholder
+# Description: The primary research input. Can be a textual topic/prompt, a local file path, or a public URL.
+# Default: [User prompt/topic or path/URL]
+RESEARCH_INPUT: [USER_VALUE_START] [User prompt/topic or path/URL] [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Accepted
+# Description: Specifies the primary output mode. Options: "SME" (for updating SME knowledge base) or "Report" (for generating a standalone report).
+# Default: SME
+OUTPUT_MODE: [USER_VALUE_START] SME [USER_VALUE_END]
+
+# === SME Output Configuration (Used if OUTPUT_MODE is "SME") ===
+# Requirement: Conditional (Required if OUTPUT_MODE is "SME") | DefaultType: Placeholder
+# Description: The base name of the SME domain (e.g., "ai_agents_and_context"). Expert knowledge output goes to leveled files like \`promptu_dev/kb/[DOMAIN_NAME]/expert_L0.md\`, \`expert_L1.md\`, etc., and references to \`promptu_dev/kb/[DOMAIN_NAME]/refs.md\`.
+# Default: [SME Domain Name]
+TARGET_SME_DOMAIN_NAME: [USER_VALUE_START] [SME Domain Name] [USER_VALUE_END]
+
+# === Report Output Configuration (Used if OUTPUT_MODE is "Report") ===
+# Requirement: Conditional (Required if OUTPUT_MODE is "Report") | DefaultType: Placeholder
+# Description: An identifier for the report (e.g., "MyQ1Analysis"). Output goes to conventional paths like promptu_dev/reports/[IDENTIFIER]/[IDENTIFIER]_L[Level].md.
+# Default: [Report Identifier]
+REPORT_IDENTIFIER: [USER_VALUE_START] [Report Identifier] [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Placeholder
+# Description: Provide a proposed Table of Contents (as inline text or path to file) if generating a report.
+# Default:
+PROPOSED_TABLE_OF_CONTENTS: [USER_VALUE_START] [No Table of Contents Provided] [USER_VALUE_END]
+
+# === Research Control Parameters ===
+# Requirement: Required | DefaultType: Placeholder
+# Description: Requested research level (e.g., 0 for initial overview, 1 for detailed summary, 2 for in-depth analysis). Add-on will report after Level 0 and await further instruction for deeper levels.
+# Default:
+REQUESTED_RESEARCH_LEVEL: [USER_VALUE_START] 0 [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Placeholder
+# Description: Document reference following depth (0-2). 0=No following, 1=Follow direct references, 2=Follow references of references. Applied during deeper research levels.
+# Default:
+REFERENCE_FOLLOWING_DEPTH: [USER_VALUE_START] 1 [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Placeholder
+# Description: Specifies reference files and specific reference IDs/tags to use. Format: "path/to/file.md[id1,id2];path/to/other_file.md[*];..." (use [*] or [] for all from file).
+# Default:
+TARGETED_REFERENCE_SOURCES: [USER_VALUE_START] [N/A] [USER_VALUE_END]
+
+# === General Supporting Inputs (Optional) ===
+# Requirement: Required | DefaultType: Placeholder
+# Description: Comma-separated list of paths to .txt or .md documents, or public web links, to provide general context or supplementary information.
+# Default:
+GENERAL_INPUT_DOCS: [USER_VALUE_START] [No general input documents provided] [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Placeholder
+# Description: Comma-separated list of paths to .txt or .md files containing guidelines for content style or structure.
+# Default:
+GUIDELINES_DOC_PATHS: [USER_VALUE_START] [No Guidelines Provided] [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Placeholder
+# Description: Path to a single .txt or .md file containing additional web links (one URL per line) to be included in the research.
+# Default:
+ADDITIONAL_WEB_LINKS_FILE: [USER_VALUE_START] [No Additional Web Links File Provided] [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Placeholder
+# Description: Comma-separated list of paths to .txt or .md exemplar documents, or public web links. These serve as style and content examples.
+# Default:
+EXEMPLAR_DOCS: [USER_VALUE_START] [No Exemplar Documents Provided] [USER_VALUE_END]
+
+# Requirement: Required | DefaultType: Placeholder
+# Description: Path to the state/output directory of a previous research iteration, used for resuming multi-stage research.
+# Default:
+PREVIOUS_ITERATION_OUTPUT_PATH: [USER_VALUE_START] [Path to previous iteration state or N/A] [USER_VALUE_END]
+
+
+# Requirement: Optional | DefaultType: Placeholder
+# Description: OPERATIONAL PARAMETER - Unique instance ID for this execution of create_research_report, typically provided by the invoking Main AI (Agni). Used for managing dedicated handoff notes and enabling resumption.
+# Default: [Not Set - Provided by Invoker]
+COMPONENT_INSTANCE_ID: [USER_VALUE_START] [Not Set - Provided by Invoker] [USER_VALUE_END]
+
+[[END_USER_CONFIG_FOR_create_research_report]]
