@@ -1,7 +1,13 @@
+```json
 {
   "description": "Active AIdentity Directives (Traits with applied strictness)",
   "version": "1.0",
   "traits": [
+    {
+      "id": "Trait_Core_AIdentityAdherenceMonitor",
+      "enabled": true,
+      "order": 5
+    },
     {
       "id": "Trait_Core_Rule_FileOperationsRestriction",
       "strictness": "Rule",
@@ -85,3 +91,4 @@
     }
   ]
 }
+```
