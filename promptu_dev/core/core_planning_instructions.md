@@ -56,9 +56,36 @@ A. **Determine Framework & AIdentity Paths:**
     3.  INTERNAL_STATE: `session.Framework_Root_Path` = Get parent directory of `session.Core_Directory_Path`.
     4.  INTERNAL_STATE: `session.Aidentity_Base_Path` = Concatenate `session.Framework_Root_Path` with "aidentity/".
     5.  LOG: Level=INFO, Message="Framework Root: [session.Framework_Root_Path], AIdentity Base: [session.Aidentity_Base_Path], Core Directory: [session.Core_Directory_Path]."
+    6.  VALIDATE_PATH: `session.Aidentity_Base_Path`.
+        *   ACTION: Check if directory `[session.Aidentity_Base_Path]` exists.
+        *   ON_ERROR (directory does not exist):
+            a.  LOG: Level=CRITICAL, Message="CRITICAL: Determined AIdentity base path `[session.Aidentity_Base_Path]` does not exist. Cannot locate critical context files."
+            b.  REQUEST_USER_INPUT: "CRITICAL: The AIdentity directory `[session.Aidentity_Base_Path]` was not found. This directory is essential for loading my context (like `aidentity_context.json` and `handoff_notes.md`). \n\nOptions:\n(A) Abort session (Recommended - allows you to check the framework structure and my invocation). \n(S) Specify the correct path to the 'aidentity' directory. \n\nEnter A or S:"
+            c.  IF UserInput is 'A': HALT.
+            d.  IF UserInput is 'S':
+                i.  REQUEST_USER_INPUT: "Please provide the correct full path to the 'aidentity' directory:"
+                ii. `session.Aidentity_Base_Path` = User's response.
+                iii. LOG: Level=INFO, Message="User specified new Aidentity_Base_Path: `[session.Aidentity_Base_Path]`."
+                iv. GOTO I.A.6 (to re-validate the new path).
+            e.  ELSE (invalid input):
+                i. MESSAGE_USER: "Invalid selection. Please choose A or S."
+                ii. GOTO I.A.6.b (re-ask).
 
 B. **Identify Self (AIdentity) from Context:**
     1.  INTERNAL_STATE: `Aidentity_Context_File_Path` = Concatenate `session.Aidentity_Base_Path` with "aidentity_context.json".
+    1.bis. ACTION: Check if file `[Aidentity_Context_File_Path]` exists.
+        *   ON_ERROR (file does not exist at expected path):
+            a.  LOG: Level=CRITICAL, Message="CRITICAL: `aidentity_context.json` not found at expected path `[Aidentity_Context_File_Path]`."
+            b.  REQUEST_USER_INPUT: "CRITICAL: `aidentity_context.json` not found at `[Aidentity_Context_File_Path]`. I cannot initialize without this file. \n\nOptions:\n(A) Abort session (Recommended - check file location). \n(S) Specify the correct full path to `aidentity_context.json`. \n\nEnter A or S:"
+            c.  IF UserInput is 'A': HALT.
+            d.  IF UserInput is 'S':
+                i. REQUEST_USER_INPUT: "Please provide the correct full path to `aidentity_context.json`:"
+                ii. `Aidentity_Context_File_Path` = User's response.
+                iii. LOG: Level=INFO, Message="User specified new Aidentity_Context_File_Path: `[Aidentity_Context_File_Path]`."
+                // Fall through to I.B.2 to attempt reading from new path
+            e. ELSE (invalid input):
+                i. MESSAGE_USER: "Invalid selection. Please choose A or S."
+                ii. GOTO I.B.1.bis.b (re-ask).
     2.  ACTION: Read JSON file at `Aidentity_Context_File_Path`. Store result in `temp.aidentity_context_data`.
         *   ON_ERROR: Log CRITICAL "AIdentity context file not found or unreadable at [Aidentity_Context_File_Path]. Halting.", HALT.
     3.  ACTION: Extract `aidentity_id` from `temp.aidentity_context_data` into `session.aidentity_id`.
@@ -69,12 +96,37 @@ B. **Identify Self (AIdentity) from Context:**
 
 C. **Process Handoff Notes:**
     1.  INTERNAL_STATE: `Handoff_Notes_File_Path` = Concatenate `session.Aidentity_Base_Path` with "handoff_notes.md".
+    1.bis. ACTION: Check if file `[Handoff_Notes_File_Path]` exists.
+        *   ON_ERROR (file does not exist at expected path):
+            a.  LOG: Level=WARNING, Message="WARNING: `handoff_notes.md` not found at expected path `[Handoff_Notes_File_Path]`. Will proceed to robust read attempt (I.C.2) which will require user interaction."
+            // Fall through to I.C.2, which will handle the "file not found" scenario interactively.
     2.  ACTION: Read file `Handoff_Notes_File_Path`. Store content as `temp.stale_notes_content`.
-        *   ON_ERROR: Log WARNING "Handoff notes file not found at [Handoff_Notes_File_Path]. Proceeding with no handoff context." `temp.stale_notes_content` = "".
+        *   ON_ERROR:
+            a.  LOG: Level=CRITICAL, Message="CRITICAL: Handoff notes file (`handoff_notes.md`) not found (even after path check) or unreadable at `[Handoff_Notes_File_Path]`."
+            b.  REQUEST_USER_INPUT: "CRITICAL: `handoff_notes.md` was not found or is unreadable at the path: `[Handoff_Notes_File_Path]`. \n\nTo prevent data loss from a previous session, it's crucial to load the correct handoff notes. \n\nHow would you like to proceed? \n(A) Abort session. (Allows you to manually check the file path, permissions, or content). \n(R) Retry reading the file at the same path. \n(P) Proceed with an empty/fresh handoff state. (WARNING: This is NOT recommended if you expect previous session data to exist, as it may be overwritten upon session completion). \n\nEnter A, R, or P:"
+            c.  IF UserInput is 'A': HALT.
+            d.  IF UserInput is 'R': GOTO I.C.2
+            e.  IF UserInput is 'P':
+                i.  LOG: Level=WARNING, Message="USER OVERRIDE: User chose to proceed with an empty/fresh handoff state despite earlier read failure for `handoff_notes.md`."
+                ii. `temp.stale_notes_content` = "".
+            f.  ELSE (invalid input):
+                i.  MESSAGE_USER: "Invalid selection. Please choose A, R, or P."
+                ii. GOTO I.C.2.b (re-ask).
     3.  ACTION: Parse `temp.stale_notes_content` for:
         a.  Explicit "Meta-Plan" steps. Store as `session.Pending_Meta_Tasks` (list).
         b.  The "**Focus for Next Jules Instance ([session.aidentity_name_full] Continuum):**" directive. Store as `session.Handoff_Primary_Directive` (string).
     4.  LOG: Level=INFO, Message="Handoff notes processed. Primary Directive: '[session.Handoff_Primary_Directive]'. Meta-Tasks: [count(session.Pending_Meta_Tasks)]."
+    bis. **Affirm Loaded Handoff Context (User Sanity Check):**
+        1. TEMP_STATE: `summary_directive` = First 100 characters of `session.Handoff_Primary_Directive` if `session.Handoff_Primary_Directive` is not empty, else "empty".
+        2. TEMP_STATE: `pending_tasks_count` = `count(session.Pending_Meta_Tasks)`.
+        3. REQUEST_USER_INPUT: "Context Loaded: \n- Handoff Primary Directive (preview): '`[summary_directive]`...' \n- Pending Meta-Tasks found: `[pending_tasks_count]`. \n\nDoes this seem like the correct context from your previous session? (Y/N) \n(Answering N will halt the session for manual review to prevent errors.)"
+        4. IF UserInput is 'N' (case-insensitive):
+            a. LOG: Level=CRITICAL, Message="User indicated loaded handoff context is incorrect or unexpected. Halting for manual review."
+            b. MESSAGE_USER: "Halting session as per your request. Please review the content of `[Handoff_Notes_File_Path]` and your setup, then re-invoke."
+            c. HALT.
+        5. ELSE (UserInput is 'Y' or anything else considered affirmative):
+            a. LOG: Level=INFO, Message="User affirmed loaded handoff context appears correct."
+            // Proceed with CPI execution (i.e., move to Section I.D)
 
 D. **Activate Traits & Core Directives:**
     1.  INTERNAL_STATE: `Trait_Manifest_Filename` = Get value of `active_directives_manifest_path` from `temp.aidentity_context_data`.
