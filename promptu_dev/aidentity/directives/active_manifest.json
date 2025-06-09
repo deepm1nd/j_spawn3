@@ -6,128 +6,144 @@
       "id": "Trait_Core_AIdentityAdherenceMonitor",
       "strictness": "Rule",
       "enabled": true,
-      "order": 5
+      "order": 10
     },
     {
       "id": "Trait_Core_Rule_FileOperationsRestriction",
       "strictness": "Rule",
       "enabled": true,
-      "order": 10
+      "order": 20
     },
     {
       "id": "Trait_Core_Rule_ModificationOfOperationalDirectives",
       "strictness": "Rule",
       "enabled": true,
-      "order": 20
-    },
-    {
-      "id": "Trait_ImmediateInterruptProcessing",
-      "strictness": "Rule",
-      "enabled": true,
-      "order": 50,
-      "parameter_overrides": {
-        "interrupt_keywords": ["stop", "pause", "wait", "hold on", "cancel that", "nevermind", "abort"],
-        "interrupt_acknowledgement_message": "Understood. Pausing current activities and clearing pending actions. Please provide new instructions."
-      }
-    },
-    {
-      "id": "Trait_Core_Meta_ProtocolForHandlingDeviations",
-      "strictness": "Guideline",
-      "enabled": true
-    },
-    {
-      "id": "Trait_Core_AIdentity_UpdateHandoffNotes",
-      "strictness": "Guideline",
-      "enabled": true
+      "order": 30
     },
     {
       "id": "Trait_DevPlanner_MandatoryInputConfirmation",
       "strictness": "Rule",
       "enabled": true,
-      "order": 150
+      "order": 40
+    },
+    {
+      "id": "Trait_ImmediateInterruptProcessing",
+      "strictness": "Rule",
+      "enabled": true,
+      "parameter_overrides": {
+        "interrupt_keywords": [
+          "stop",
+          "pause",
+          "wait",
+          "hold on",
+          "cancel that",
+          "nevermind",
+          "abort"
+        ],
+        "interrupt_acknowledgement_message": "Understood. Pausing current activities and clearing pending actions. Please provide new instructions."
+      },
+      "order": 50
     },
     {
       "id": "Trait_BatchBeforeResponding",
       "strictness": "Guideline",
       "enabled": true,
-      "order": 150,
       "parameter_overrides": {
         "batch_window_seconds": 10,
         "short_task_fickle_delay_seconds": 7,
         "fickle_action_message_template": "Okay, I plan to: {action_description}. I'll proceed in {delay_seconds}s unless you have a quick change for this specific task."
-      }
+      },
+      "order": 60
     },
     {
       "id": "Trait_Core_Guideline_BranchNamingConventionsForCommits",
       "strictness": "Guideline",
       "enabled": true,
-      "order": 200
+      "order": 70
     },
     {
       "id": "Trait_Core_Guideline_PrimaryProgrammingLanguageRust",
       "strictness": "Guideline",
       "enabled": true,
-      "order": 210
+      "order": 80
     },
     {
       "id": "Trait_Core_Guideline_ActionNoticeProtocol",
       "strictness": "Guideline",
       "enabled": true,
-      "order": 250
+      "order": 90
     },
     {
       "id": "Trait_Chat_AICommStyleSessionUniqueIDsForActionDrivingQuestions",
       "strictness": "Guideline",
       "enabled": true,
-      "order": 300
-    },
-    {
-      "id": "Trait_Chat_AICommStyleStructureQuestionsForSimpleResponses",
-      "strictness": "Guideline",
-      "enabled": true
-    },
-    {
-      "id": "Trait_Chat_InterpretUserShorthandGuidelineProposal",
-      "strictness": "Guideline",
-      "enabled": true
-    },
-    {
-      "id": "Trait_Chat_InterpretUserShorthandPreferenceProposal",
-      "strictness": "Guideline",
-      "enabled": true
-    },
-    {
-      "id": "Trait_Chat_InterpretUserShorthandRuleProposal",
-      "strictness": "Guideline",
-      "enabled": true
-    },
-    {
-      "id": "Trait_Chat_InterpretUserShorthandSHDefinition",
-      "strictness": "Guideline",
-      "enabled": true
-    },
-    {
-      "id": "Trait_Chat_InterpretUserShorthandTodoItem",
-      "strictness": "Guideline",
-      "enabled": true
-    },
-    {
-      "id": "Trait_Chat_InterpretAsteriskEmphasis",
-      "strictness": "Guideline",
-      "enabled": true,
-      "order": 449
+      "order": 100
     },
     {
       "id": "Trait_Chat_DetectPotentialInputGarbageOrTypo",
       "strictness": "Guideline",
       "enabled": true,
-      "order": 450
+      "order": 110
+    },
+    {
+      "id": "Trait_Chat_InterpretAsteriskEmphasis",
+      "strictness": "Guideline",
+      "enabled": true,
+      "order": 120
+    },
+    {
+      "id": "Trait_Core_AIdentity_UpdateHandoffNotes",
+      "strictness": "Guideline",
+      "enabled": true,
+      "order": 130
+    },
+    {
+      "id": "Trait_Core_Meta_ProtocolForHandlingDeviations",
+      "strictness": "Guideline",
+      "enabled": true,
+      "order": 140
+    },
+    {
+      "id": "Trait_Chat_AICommStyleStructureQuestionsForSimpleResponses",
+      "strictness": "Guideline",
+      "enabled": true,
+      "order": 150
+    },
+    {
+      "id": "Trait_Chat_InterpretUserShorthandGuidelineProposal",
+      "strictness": "Guideline",
+      "enabled": true,
+      "order": 160
+    },
+    {
+      "id": "Trait_Chat_InterpretUserShorthandPreferenceProposal",
+      "strictness": "Guideline",
+      "enabled": true,
+      "order": 170
+    },
+    {
+      "id": "Trait_Chat_InterpretUserShorthandRuleProposal",
+      "strictness": "Guideline",
+      "enabled": true,
+      "order": 180
+    },
+    {
+      "id": "Trait_Chat_InterpretUserShorthandSHDefinition",
+      "strictness": "Guideline",
+      "enabled": true,
+      "order": 190
+    },
+    {
+      "id": "Trait_Chat_InterpretUserShorthandTodoItem",
+      "strictness": "Guideline",
+      "enabled": true,
+      "order": 200
     },
     {
       "id": "Trait_Core_Preference_MinimizeChatFrequencyAndContent",
       "strictness": "Preference",
       "enabled": true,
-      "order": 500
+      "order": 210
     }
   ]
 }
