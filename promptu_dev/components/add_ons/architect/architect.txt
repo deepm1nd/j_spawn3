@@ -1,376 +1,245 @@
-# Architect Component Instructions (`architect.txt`)
+[[COMPONENT_INSTRUCTIONS_FOR_architect]]
+# Component: architect
+# Description: Manages a two-phase architectural workflow: initial draft generation and interactive review.
+# Version: 1.0
 
-**COMPONENT NAME:** `architect`
-**VERSION:** 1.0
-**PRIMARY GOAL:** To collaboratively research, define, and document the architecture for a specified project, guided by a Product Definition Document and user interaction, producing a detailed Architectural Specification.
+LOG: Architect component execution started.
 
----
-## I. Initialization and Input Processing
+# --- Parameter Validation ---
+LOG: Validating OPERATING_PHASE.
+IF parameters.OPERATING_PHASE == "":
+    MESSAGE_USER: ERROR - OPERATING_PHASE is not set. Please specify "GenerateInitialDraft" or "InteractiveReview".
+    ACTION: TerminateWithError message="OPERATING_PHASE is required."
+ELSEIF parameters.OPERATING_PHASE != "GenerateInitialDraft" && parameters.OPERATING_PHASE != "InteractiveReview":
+    MESSAGE_USER: ERROR - Invalid OPERATING_PHASE: "[parameters.OPERATING_PHASE]". Must be "GenerateInitialDraft" or "InteractiveReview".
+    ACTION: TerminateWithError message="Invalid OPERATING_PHASE."
+ENDIF
+LOG: OPERATING_PHASE is "[parameters.OPERATING_PHASE]".
 
-**A. Acknowledge Component and Configuration Source:**
-    1.  INFO "Architect component (v1.0) now executing."
-    2.  RESOLVE_CONFIG_FILE_PATH `user_config_path` = `promptu/components/add_ons/architect/user_architect_config.txt`.
-    3.  LOAD_CONFIG `user_config` from `user_config_path`.
-    4.  // Note: Core framework would have loaded main prompt's `[[USER_CONFIG_FOR_architect]]` into `App_Specific_Configs_Content_Map['architect']`.
+# --- Main Workflow Branching ---
+IF parameters.OPERATING_PHASE == "GenerateInitialDraft":
+    LOG: Calling Phase1_GenerateInitialDraft.
+    [[CALL_SUB_WORKFLOW Phase1_GenerateInitialDraft]]
+ELSEIF parameters.OPERATING_PHASE == "InteractiveReview":
+    LOG: Calling Phase2_InteractiveReview.
+    [[CALL_SUB_WORKFLOW Phase2_InteractiveReview]]
+ENDIF
 
-**B. Resolve Core Parameters (from `user_config` and main prompt overrides):**
-    1.  `Resolved_Architect_Product_Definition_Doc_Path`: (Required) Path/URL to the authoritative Product Definition Document. Source: `PRODUCT_DEFINITION_DOC_PATH`.
-    2.  `Resolved_Architect_Initial_Outline_Source_Path`: (Optional) Path/URL to a document for initial outline/ToC extraction. Source: `INITIAL_OUTLINE_SOURCE_PATH`.
-    3.  `Resolved_Architect_Input_Reference_Material_List`: (Optional) Comma-separated list of paths/URLs for comparative research and inspiration. Source: `INPUT_REFERENCE_MATERIAL_LIST`.
-    4.  `Resolved_Architect_Arch_Spec_Exemplar_Refs`: (Optional) Comma-separated paths/URLs to exemplar architectural documents. Source: `ARCH_SPEC_EXEMPLAR_REFS`.
-    5.  `Resolved_Architect_Arch_Methodology_Guides`: (Optional) Comma-separated paths/URLs to architectural methodology guides. Source: `ARCH_METHODOLOGY_GUIDES`.
-    6.  `Resolved_Architect_Architectural_Decisions_Input_Path`: (Optional) Path/URL to pre-existing architectural decisions. Source: `ARCHITECTURAL_DECISIONS_INPUT_PATH`.
-    7.  `Resolved_Architect_Base_Output_Path`: (Required) Base directory for all outputs. Source: `BASE_OUTPUT_PATH`.
-    8.  `Resolved_Architect_Main_Spec_Filename`: (Required) Filename for the primary architectural specification. Source: `MAIN_ARCH_SPEC_FILENAME`.
-    9.  `Resolved_Architect_Component_Instance_ID`: (Optional, from invoker) Source: `COMPONENT_INSTANCE_ID`.
-    10. `Resolved_Architect_Project_Name`: (Optional) Source: `PROJECT_NAME`.
-    11. // Other parameters like ITERATION_ID, WORKFLOW_TYPE, output subdirs can be resolved as needed.
+LOG: Architect component execution finished.
 
-**C. Initialize Session State & Handoff:**
-    1.  IF `Resolved_Architect_Component_Instance_ID` is valid THEN
-        a.  SET `session.Is_Resumable_Session` = `true`.
-        b.  SET `session.Handoff_File_Path` = `promptu_dev/aidentity/archive/components/[Resolved_Architect_Component_Instance_ID]_handoff.md`.
-        c.  INFO "Resumable session. Handoff file: [session.Handoff_File_Path]".
-        d.  IF file `session.Handoff_File_Path` exists THEN
-            i.  LOAD_HANDOFF_STATE from `session.Handoff_File_Path`.
-            ii. INFO "Prior state loaded from handoff file."
-            iii. // Potentially restore last_completed_phase, current_spec_content, etc.
-        e.  ELSE
-            i.  INFO "No prior handoff file. Starting fresh."
-            ii. SET `session.last_completed_major_step` = "I.C". // Initial state
-            iii. CREATE_HANDOFF_FILE `session.Handoff_File_Path` with initial content:
-                ```markdown
-                # Architect Component Handoff
-                **ComponentInstanceID:** `[Resolved_Architect_Component_Instance_ID]`
-                **Status:** Initializing
-                **LastCompletedMajorStep:** I.C
-                **Timestamp:** `[Current Timestamp]`
-                ```
-            iv. INFO "Initial handoff file created."
-        f.  END_IF
-    2.  ELSE
-        a.  SET `session.Is_Resumable_Session` = `false`.
-        b.  INFO "Not a resumable session (no ComponentInstanceID)."
-    3.  END_IF
+# ------------------------------------------------------------------------------
+# --- SUB-WORKFLOW DEFINITIONS ---
+# ------------------------------------------------------------------------------
 
-**D. Validate Authoritative Input:**
-    1.  VALIDATE_ACCESSIBILITY `Resolved_Architect_Product_Definition_Doc_Path`.
-    2.  IF validation fails THEN
-        a.  LOG_ERROR "Product Definition Document at [Resolved_Architect_Product_Definition_Doc_Path] is not accessible."
-        b.  UPDATE_HANDOFF_STATUS "Failed: Product Definition Document inaccessible." (If resumable)
-        c.  HALT_EXECUTION "Critical input missing: Product Definition Document."
-    3.  END_IF
-    4.  INFO "Product Definition Document validated: [Resolved_Architect_Product_Definition_Doc_Path]".
+# === Phase 1: Generate Initial Draft ===
+[[DEFINE_SUB_WORKFLOW Phase1_GenerateInitialDraft]]
+    LOG: Phase 1: GenerateInitialDraft started.
 
-**E. Initial User Confirmation (Mandatory):**
-    1.  SUMMARIZE_INPUTS: Display all resolved core parameters (Product Definition Doc path, main output filename, base output path, and key optional inputs if provided).
-    2.  DISPLAY_MESSAGE "Please review the resolved parameters. The primary source of truth will be the Product Definition Document. Proceed with generating the Architectural Specification? (Y/N)"
-    3.  AWAIT_USER_INPUT `user_confirmation`.
-    4.  IF `user_confirmation` is "N" or "n" THEN
-        a.  LOG_INFO "User opted not to proceed."
-        b.  UPDATE_HANDOFF_STATUS "Halted: User declined to proceed after input review." (If resumable)
-        c.  HALT_EXECUTION "User declined to proceed."
-    5.  END_IF
-    6.  INFO "User confirmed to proceed."
+    # Validate required parameters for Phase 1
+    LOG: Validating INITIAL_REQUIREMENTS_INPUT for Phase 1.
+    IF parameters.INITIAL_REQUIREMENTS_INPUT == "":
+        MESSAGE_USER: ERROR - INITIAL_REQUIREMENTS_INPUT is required for GenerateInitialDraft phase.
+        ACTION: TerminateWithError message="INITIAL_REQUIREMENTS_INPUT is required for GenerateInitialDraft."
+    ENDIF
+    LOG: INITIAL_REQUIREMENTS_INPUT found.
 
-**F. Prepare Output Paths:**
-    1.  `session.Full_Main_Spec_Path` = `[Resolved_Architect_Base_Output_Path]/[Resolved_Architect_Main_Spec_Filename]`.
-    2.  // Define other output paths for supporting docs, diagrams as needed, e.g.,
-    3.  // `session.Supporting_Docs_Dir_Path` = `[Resolved_Architect_Base_Output_Path]/[Resolved_Architect_Supporting_Docs_Subdir]/`.
-    4.  // CREATE_DIRECTORY `session.Supporting_Docs_Dir_Path`.
+    # Generate Session ID
+    IF parameters.COMPONENT_INSTANCE_ID != "":
+        IF string_length(parameters.COMPONENT_INSTANCE_ID) > 8:
+            INTERNAL_STATE: current_session_id = substring(parameters.COMPONENT_INSTANCE_ID, -8) # Example: take last 8 chars
+        ELSE:
+            INTERNAL_STATE: current_session_id = parameters.COMPONENT_INSTANCE_ID
+        ENDIF
+    ELSE:
+        INTERNAL_STATE: current_session_id = "ses" + substring(timestamp_ms(), -5) # Example: "ses12345"
+    ENDIF
+    LOG: Generated current_session_id: "[internal_state.current_session_id]".
+    MESSAGE_USER: Starting architectural draft generation for session ID: [internal_state.current_session_id]. Project: [parameters.PROJECT_NAME], Iteration: [parameters.ITERATION_ID].
 
-**G. Update Handoff Status:**
-    1.  IF `session.Is_Resumable_Session` is `true` THEN
-        a.  UPDATE_HANDOFF_STATUS `session.Handoff_File_Path` with "Status: Initialization Complete. Proceeding to Outline Generation.", `LastCompletedMajorStep: I.G`.
-    2.  END_IF
+    # Construct Output Paths
+    INTERNAL_STATE: session_output_dir = parameters.OUTPUT_BASE_DIR + "/" + internal_state.current_session_id
+    LOG: Session output directory will be: [internal_state.session_output_dir]
 
-INFO "Initialization and Input Processing Complete."
----
-## II. Outline Generation and Document Initialization
+    INTERNAL_STATE: temp_processed_req_template = parameters.PROCESSED_REQUIREMENTS_FILENAME_TEMPLATE.replace("{{PROJECT_NAME}}", parameters.PROJECT_NAME)
+    INTERNAL_STATE: processed_req_filename = temp_processed_req_template.replace("{{SESSION_ID}}", internal_state.current_session_id)
+    INTERNAL_STATE: processed_req_filepath = internal_state.session_output_dir + "/" + internal_state.processed_req_filename
 
-**A. Check for Resumed Outline:**
-    1.  IF `session.Is_Resumable_Session` is `true` AND `session.state` contains `Initial_Outline_Markdown` THEN
-        a.  `session.Architectural_Specification_Outline_Markdown` = `session.state.Initial_Outline_Markdown`.
-        b.  INFO "Restored initial outline from handoff state."
-        c.  GOTO II.C (Initialize Main Specification Document).
-    2.  END_IF
+    INTERNAL_STATE: temp_main_spec_template = parameters.MAIN_DRAFT_SPEC_FILENAME_TEMPLATE.replace("{{PROJECT_NAME}}", parameters.PROJECT_NAME)
+    INTERNAL_STATE: main_spec_filename = temp_main_spec_template.replace("{{SESSION_ID}}", internal_state.current_session_id)
+    INTERNAL_STATE: main_spec_filepath = internal_state.session_output_dir + "/" + internal_state.main_spec_filename
 
-**B. Generate Initial Outline / Table of Contents (ToC):**
-    1.  IF `Resolved_Architect_Initial_Outline_Source_Path` is valid and accessible THEN
-        a.  INFO "Attempting to extract initial outline from: [Resolved_Architect_Initial_Outline_Source_Path]."
-        b.  EXTRACT_MARKDOWN_OUTLINE from `Resolved_Architect_Initial_Outline_Source_Path` into `extracted_outline_markdown`.
-        c.  IF `extracted_outline_markdown` is valid and substantial THEN
-            i.  `session.Architectural_Specification_Outline_Markdown` = `extracted_outline_markdown`.
-            ii. INFO "Successfully extracted initial outline from user-provided source."
-        d.  ELSE
-            i.  INFO "Could not extract a substantial outline from user source. Will generate based on Product Definition Document."
-            ii. GENERATE_OUTLINE based on `Resolved_Architect_Product_Definition_Doc_Path` (focus on key product features, non-functional requirements, system components/modules if mentioned) into `generated_outline_markdown`.
-            iii. `session.Architectural_Specification_Outline_Markdown` = `generated_outline_markdown`.
-        e.  END_IF
-    2.  ELSE
-        a.  INFO "No initial outline source provided. Generating outline based on Product Definition Document."
-        b.  GENERATE_OUTLINE based on `Resolved_Architect_Product_Definition_Doc_Path` (focus on key product features, non-functional requirements, system components/modules if mentioned) into `generated_outline_markdown`.
-        c.  `session.Architectural_Specification_Outline_Markdown` = `generated_outline_markdown`.
-    3.  END_IF
-    4.  // Self-correction: Ensure the outline includes at least "Introduction", "Key Features", "System Architecture Overview", "Data Architecture", "Deployment View", "Non-Functional Requirements", "Glossary". Add them if missing.
-    5.  REFINE_OUTLINE `session.Architectural_Specification_Outline_Markdown` to ensure key sections (Introduction, Key Features, System Architecture Overview, Data Architecture, Deployment View, Non-Functional Requirements, Glossary) are present. Store as `session.Architectural_Specification_Outline_Markdown`.
-    6.  DISPLAY_MESSAGE "The following initial outline/Table of Contents has been generated/extracted:"
-    7.  DISPLAY_CONTENT `session.Architectural_Specification_Outline_Markdown`.
-    8.  DISPLAY_MESSAGE "Would you like to: (1) Approve this outline, (2) Edit this outline, or (3) Provide a new outline? (Enter 1, 2, or 3)"
-    9.  AWAIT_USER_INPUT `user_choice_outline`.
-    10. IF `user_choice_outline` is "2" THEN
-        a.  REQUEST_USER_EDIT of `session.Architectural_Specification_Outline_Markdown`. Store as `session.Architectural_Specification_Outline_Markdown`.
-        b.  INFO "Outline updated by user."
-    11. ELSE_IF `user_choice_outline` is "3" THEN
-        a.  REQUEST_USER_TEXT_INPUT "Please paste the new outline here:". Store as `session.Architectural_Specification_Outline_Markdown`.
-        b.  INFO "New outline provided by user."
-    12. ELSE_IF `user_choice_outline` is "1" THEN
-        a.  INFO "Outline approved by user."
-    13. ELSE
-        a.  INFO "Invalid choice. Proceeding with the current outline."
-    14. END_IF
-    15. IF `session.Is_Resumable_Session` is `true` THEN
-        a.  SAVE_TO_HANDOFF_STATE `session.Handoff_File_Path` key `Initial_Outline_Markdown` value `session.Architectural_Specification_Outline_Markdown`.
-    16. END_IF
+    INTERNAL_STATE: temp_selections_doc_template = parameters.SELECTIONS_DOC_FILENAME_TEMPLATE.replace("{{PROJECT_NAME}}", parameters.PROJECT_NAME)
+    INTERNAL_STATE: selections_doc_filename = temp_selections_doc_template.replace("{{SESSION_ID}}", internal_state.current_session_id)
+    INTERNAL_STATE: selections_doc_filepath = internal_state.session_output_dir + "/" + internal_state.selections_doc_filename
 
-**C. Initialize Main Specification Document:**
-    1.  CREATE_FILE `session.Full_Main_Spec_Path`.
-    2.  WRITE_TO_FILE `session.Full_Main_Spec_Path` content:
-        ```markdown
-        # Architectural Specification: [Resolved_Architect_Project_Name]
+    INTERNAL_STATE: temp_checklist_template = parameters.REVIEW_CHECKLIST_FILENAME_TEMPLATE.replace("{{PROJECT_NAME}}", parameters.PROJECT_NAME)
+    INTERNAL_STATE: checklist_filename = temp_checklist_template.replace("{{SESSION_ID}}", internal_state.current_session_id)
+    INTERNAL_STATE: checklist_filepath = internal_state.session_output_dir + "/" + internal_state.checklist_filename
 
-        **Version:** 1.0
-        **Date:** `[Current Date]`
-        **Status:** Initial Draft
-        **Product Definition Document:** `[Resolved_Architect_Product_Definition_Doc_Path]`
+    # Create Output Directory
+    LOG: Creating directory: [internal_state.session_output_dir]
+    ACTION: CreateDirectory path=internal_state.session_output_dir
+    MESSAGE_USER: Output directory created at [internal_state.session_output_dir].
 
-        ---
-        ## Table of Contents
-        [session.Architectural_Specification_Outline_Markdown]
+    # Process Initial Requirements
+    LOG: Processing INITIAL_REQUIREMENTS_INPUT: "[parameters.INITIAL_REQUIREMENTS_INPUT]"
+    INTERNAL_STATE: temp.requirements_content = read_file(parameters.INITIAL_REQUIREMENTS_INPUT) # Assumes it's a path
+    ACTION: CreateFile path=internal_state.processed_req_filepath content=internal_state.temp.requirements_content
+    MESSAGE_USER: Copied initial requirements to [internal_state.processed_req_filepath].
 
-        ---
-        ## 1. Introduction
-        <!-- Section 1: Introduction. AI to draft initial content here based on Product Definition Document. -->
-        <!-- This section should briefly introduce the product, its purpose, intended audience, and the scope of this architectural document. -->
+    # Research Step (Abstracted)
+    LOG: Beginning research based on requirements and reference materials.
+    MESSAGE_USER: Performing research and analysis based on your requirements and provided materials ([parameters.REFERENCE_MATERIALS_LIST], [parameters.METHODOLOGY_GUIDES_LIST])...
+    INTERNAL_STATE: temp.research_findings = "Abstracted research summary: Key technologies identified are X, Y, Z. Architectural patterns considered: A, B. Constraints: C1, C2."
+    LOG: Research findings: [internal_state.temp.research_findings]
+
+    # Generate Main Architectural Specification (Abstracted)
+    LOG: Generating main architectural specification.
+    MESSAGE_USER: Generating the main architectural specification document...
+    INTERNAL_STATE: temp.main_spec_content = "## Main Architectural Specification - " + parameters.PROJECT_NAME + " - Session " + internal_state.current_session_id + "
+
+"
+    INTERNAL_STATE: temp.main_spec_content += "Based on requirements at: " + internal_state.processed_req_filepath + "
+"
+    INTERNAL_STATE: temp.main_spec_content += "Research Summary: " + internal_state.temp.research_findings + "
+
+"
+    IF parameters.PROPOSED_OUTLINE_SOURCE != "":
+        LOG: Using proposed outline from [parameters.PROPOSED_OUTLINE_SOURCE].
+        INTERNAL_STATE: temp.proposed_outline_content = read_file(parameters.PROPOSED_OUTLINE_SOURCE)
+        INTERNAL_STATE: temp.main_spec_content += "## Guided Outline Sections
+" + internal_state.temp.proposed_outline_content + "
+
+"
+    ELSE:
+        LOG: No proposed outline provided. Generating standard outline.
+        INTERNAL_STATE: temp.main_spec_content += "## Standard Outline Sections
+1. Introduction
+2. Goals & Constraints
+3. System Overview
+4. Component Breakdown
+5. Data Model
+6. Deployment Strategy
+7. Future Considerations
+
+"
+    ENDIF
+    INTERNAL_STATE: temp.main_spec_content += "Further detailed sections to be populated based on full analysis...
+"
+    ACTION: CreateFile path=internal_state.main_spec_filepath content=internal_state.temp.main_spec_content
+    MESSAGE_USER: Main architectural specification generated: [internal_state.main_spec_filepath].
+
+    # Generate Selections Document Outline (Abstracted)
+    LOG: Generating architectural selections document.
+    MESSAGE_USER: Generating architectural selections document outline...
+    INTERNAL_STATE: temp.selections_content = "## Architectural Selections - " + parameters.PROJECT_NAME + " - Session " + internal_state.current_session_id + "
+
+"
+    INTERNAL_STATE: temp.selections_content += "This document will track key architectural decisions and selections.
+
+"
+    INTERNAL_STATE: temp.selections_content += "### Key Decision Areas (derived from spec outline):
+- Technology Stack Choices
+- Data Storage Solutions
+- Integration Patterns
+- Security Measures
+"
+    ACTION: CreateFile path=internal_state.selections_doc_filepath content=internal_state.temp.selections_content
+    MESSAGE_USER: Architectural selections document generated: [internal_state.selections_doc_filepath].
+
+    # Generate Review Checklist (Abstracted)
+    LOG: Generating review checklist.
+    MESSAGE_USER: Generating review checklist...
+    INTERNAL_STATE: temp.checklist_content = "## Review Checklist - " + parameters.PROJECT_NAME + " - Session " + internal_state.current_session_id + "
+
+"
+    INTERNAL_STATE: temp.checklist_content += "Use this checklist to review the generated architectural documents.
+
+"
+    INTERNAL_STATE: temp.checklist_content += "- [ ] Review Introduction: Clarity and Scope
+- [ ] Review Goals & Constraints: Completeness
+- [ ] Review System Overview: Understandability
+- [ ] ... (further items based on spec outline)
+"
+    ACTION: CreateFile path=internal_state.checklist_filepath content=internal_state.temp.checklist_content
+    MESSAGE_USER: Review checklist generated: [internal_state.checklist_filepath].
+
+    # Completion & Submission
+    LOG: Phase 1 generation complete.
+    MESSAGE_USER: Initial architectural draft generation for session [internal_state.current_session_id] is complete. Files are located in [internal_state.session_output_dir].
+    MESSAGE_USER: Key files: Main Spec ([internal_state.main_spec_filename]), Selections ([internal_state.selections_doc_filename]), Checklist ([internal_state.checklist_filename]).
+
+    INTERNAL_STATE: commit_message = "Architect: Phase 1 generation for " + parameters.PROJECT_NAME + " (Session: " + internal_state.current_session_id + ")"
+    INTERNAL_STATE: branch_name = "feat/arch-draft-" + internal_state.current_session_id
+    LOG: Submitting changes with commit message: '[internal_state.commit_message]' to branch '[internal_state.branch_name]'
+    ACTION: SubmitChanges branch_name=internal_state.branch_name commit_message=internal_state.commit_message
+    MESSAGE_USER: Architectural documents submitted to repository.
+
+    LOG: Phase 1: GenerateInitialDraft finished.
+[[END_DEFINE_SUB_WORKFLOW Phase1_GenerateInitialDraft]]
 
 
-        ---
-        <!-- Subsequent sections will be populated based on the outline. -->
-        ```
-    3.  INFO "Initialized main architectural specification document at: [session.Full_Main_Spec_Path]".
+# === Phase 2: Interactive Review ===
+[[DEFINE_SUB_WORKFLOW Phase2_InteractiveReview]]
+    LOG: Phase 2: InteractiveReview started.
 
-**D. Update Handoff Status:**
-    1.  IF `session.Is_Resumable_Session` is `true` THEN
-        a.  UPDATE_HANDOFF_STATUS `session.Handoff_File_Path` with "Status: Outline Approved. Main document initialized.", `LastCompletedMajorStep: II.D`.
-    2.  END_IF
+    # Validate required parameters for Phase 2
+    LOG: Validating SESSION_ID_TO_REVIEW for Phase 2.
+    IF parameters.SESSION_ID_TO_REVIEW == "":
+        MESSAGE_USER: ERROR - SESSION_ID_TO_REVIEW is required for InteractiveReview phase.
+        ACTION: TerminateWithError message="SESSION_ID_TO_REVIEW is required for InteractiveReview."
+    ENDIF
+    INTERNAL_STATE: current_session_id = parameters.SESSION_ID_TO_REVIEW
+    LOG: SESSION_ID_TO_REVIEW is "[internal_state.current_session_id]".
+    MESSAGE_USER: Starting interactive review for session ID: [internal_state.current_session_id].
 
-INFO "Outline Generation and Document Initialization Complete."
----
-## III. "Key Features" Section Development
+    # Define Paths for Review
+    INTERNAL_STATE: session_output_dir = parameters.OUTPUT_BASE_DIR + "/" + internal_state.current_session_id
+    LOG: Session directory for review: [internal_state.session_output_dir]
 
-**A. Check for Resumed Content:**
-    1.  IF `session.Is_Resumable_Session` is `true` AND `session.state` contains `Key_Features_Content_Markdown` THEN
-        a.  `key_features_section_content` = `session.state.Key_Features_Content_Markdown`.
-        b.  INFO "Restored 'Key Features' content from handoff state."
-        c.  GOTO III.C (Integrate into Main Document).
-    2.  END_IF
+    INTERNAL_STATE: temp_main_spec_template = parameters.MAIN_DRAFT_SPEC_FILENAME_TEMPLATE.replace("{{PROJECT_NAME}}", parameters.PROJECT_NAME)
+    INTERNAL_STATE: main_spec_filename = temp_main_spec_template.replace("{{SESSION_ID}}", internal_state.current_session_id)
+    INTERNAL_STATE: main_spec_filepath = internal_state.session_output_dir + "/" + internal_state.main_spec_filename
 
-**B. Draft "Key Features" Section:**
-    1.  INFO "Drafting 'Key Features' section based on Product Definition Document: [Resolved_Architect_Product_Definition_Doc_Path]."
-    2.  EXTRACT_KEY_FEATURES from `Resolved_Architect_Product_Definition_Doc_Path`. This involves identifying primary user-facing functionalities, major capabilities, and unique selling points.
-    3.  FORMAT_FEATURES_AS_MARKDOWN `extracted_features` into `draft_key_features_markdown`.
-        *   Each feature should be a sub-heading (e.g., `### Feature A`) followed by a concise description.
-        *   Include a brief introductory paragraph for the "Key Features" section.
-    4.  DISPLAY_MESSAGE "The following 'Key Features' section has been drafted:"
-    5.  DISPLAY_CONTENT `draft_key_features_markdown`.
-    6.  DISPLAY_MESSAGE "Would you like to: (1) Approve this draft, (2) Edit this draft, or (3) Provide new content for this section? (Enter 1, 2, or 3)"
-    7.  AWAIT_USER_INPUT `user_choice_features`.
-    8.  IF `user_choice_features` is "2" THEN
-        a.  REQUEST_USER_EDIT of `draft_key_features_markdown`. Store as `key_features_section_content`.
-        b.  INFO "'Key Features' section updated by user."
-    9.  ELSE_IF `user_choice_features` is "3" THEN
-        a.  REQUEST_USER_TEXT_INPUT "Please paste the new 'Key Features' content here:". Store as `key_features_section_content`.
-        b.  INFO "New 'Key Features' content provided by user."
-    10. ELSE_IF `user_choice_features` is "1" THEN
-        a.  `key_features_section_content` = `draft_key_features_markdown`.
-        b.  INFO "'Key Features' section approved by user."
-    11. ELSE
-        a.  INFO "Invalid choice. Proceeding with the current drafted 'Key Features' section."
-        b.  `key_features_section_content` = `draft_key_features_markdown`.
-    12. END_IF
-    13. IF `session.Is_Resumable_Session` is `true` THEN
-        a.  SAVE_TO_HANDOFF_STATE `session.Handoff_File_Path` key `Key_Features_Content_Markdown` value `key_features_section_content`.
-    14. END_IF
+    INTERNAL_STATE: temp_selections_doc_template = parameters.SELECTIONS_DOC_FILENAME_TEMPLATE.replace("{{PROJECT_NAME}}", parameters.PROJECT_NAME)
+    INTERNAL_STATE: selections_doc_filename = temp_selections_doc_template.replace("{{SESSION_ID}}", internal_state.current_session_id)
+    INTERNAL_STATE: selections_doc_filepath = internal_state.session_output_dir + "/" + internal_state.selections_doc_filename
 
-**C. Integrate "Key Features" Section into Main Document:**
-    1.  READ_FILE `session.Full_Main_Spec_Path` into `main_spec_content`.
-    2.  // This assumes a placeholder like "<!-- Section X: Key Features -->" or similar exists, or appends after "## 1. Introduction" if no other sections yet.
-    3.  REPLACE_SECTION_OR_APPEND `main_spec_content` with heading "## 2. Key Features" and content `key_features_section_content`.
-    4.  WRITE_TO_FILE `session.Full_Main_Spec_Path` content `main_spec_content`.
-    5.  INFO "'Key Features' section integrated into the main architectural specification."
+    INTERNAL_STATE: temp_checklist_template = parameters.REVIEW_CHECKLIST_FILENAME_TEMPLATE.replace("{{PROJECT_NAME}}", parameters.PROJECT_NAME)
+    INTERNAL_STATE: checklist_filename = temp_checklist_template.replace("{{SESSION_ID}}", internal_state.current_session_id)
+    INTERNAL_STATE: checklist_filepath = internal_state.session_output_dir + "/" + internal_state.checklist_filename
 
-**D. Update Handoff Status:**
-    1.  IF `session.Is_Resumable_Session` is `true` THEN
-        a.  UPDATE_HANDOFF_STATUS `session.Handoff_File_Path` with "Status: 'Key Features' section completed.", `LastCompletedMajorStep: III.D`.
-    2.  END_IF
+    LOG: Files for review: Main Spec ([internal_state.main_spec_filepath]), Selections ([internal_state.selections_doc_filepath]), Checklist ([internal_state.checklist_filepath]).
+    MESSAGE_USER: Loading documents from session [internal_state.current_session_id] for review.
 
-INFO "'Key Features' Section Development Complete."
----
-## IV. Iterative Topic Research, Drafting, and Discussion (Main Loop)
+    # Conceptual Interactive Loop
+    LOG: Entering conceptual interactive review loop.
+    MESSAGE_USER: Starting interactive review for session [internal_state.current_session_id]. Please provide your feedback section by section. Type 'done' when you are finished with the entire review.
 
-**A. Initialize Loop State:**
-    1.  GET_SECTION_HEADINGS from `session.Architectural_Specification_Outline_Markdown` into `remaining_sections_list` (excluding "Introduction", "Key Features", and "Table of Contents").
-    2.  IF `session.Is_Resumable_Session` is `true` AND `session.state` contains `Processed_Sections_List` THEN
-        a.  `processed_sections_list` = `session.state.Processed_Sections_List`.
-        b.  REMOVE_ITEMS `remaining_sections_list` that are in `processed_sections_list`.
-    3.  ELSE
-        a.  CREATE_EMPTY_LIST `processed_sections_list`.
-    4.  END_IF
+    INTERNAL_STATE: temp.review_loop_comment = "Conceptual Loop: The AI would now typically present a section from the [" + internal_state.checklist_filename + "] or [" + internal_state.main_spec_filename + "]. It would then use REQUEST_USER_INPUT to get feedback, proposed changes for the spec, or decisions for the [" + internal_state.selections_doc_filename + "]. This process would repeat for each section. For example: 'Presenting Section 1: Introduction. Please provide feedback or approved content.' -> REQUEST_USER_INPUT -> 'Updating main_spec.md and selections_log.md based on your input for Section 1.'"
+    LOG: [internal_state.temp.review_loop_comment]
+    MESSAGE_USER: [internal_state.temp.review_loop_comment]
+    MESSAGE_USER: This is a placeholder for the interactive review process. In a real session, we would go section by section. For now, imagine this process has completed.
 
-**B. Loop Through Remaining Sections:**
-    1.  FOR EACH `section_heading` in `remaining_sections_list`:
-        a.  SET `current_section_heading` = `section_heading`.
-        b.  INFO "Now processing section: [current_section_heading]".
-        c.  IF `session.Is_Resumable_Session` is `true` THEN
-            i.  UPDATE_HANDOFF_STATUS `session.Handoff_File_Path` with "Status: Processing section - [current_section_heading]", `CurrentSectionBeingProcessed: [current_section_heading]`.
-        d.  END_IF
+    INTERNAL_STATE: temp.user_final_action = "done"
+    LOG: User indicated review completion (simulated as '[internal_state.temp.user_final_action]').
 
-        e.  **Research and Information Gathering for `current_section_heading`:**
-            i.   DISPLAY_MESSAGE "Researching and preparing draft for section: **[current_section_heading]**."
-            ii.  IDENTIFY_RESEARCH_QUERIES based on `current_section_heading`, `Resolved_Architect_Product_Definition_Doc_Path`, and relevant KBs (e.g., `software_architecture_principles`, `microservice_architecture_patterns`).
-            iii. PERFORM_RESEARCH using `Resolved_Architect_Input_Reference_Material_List`, `Resolved_Architect_Architectural_Decisions_Input_Path`, and web searches for identified queries.
-            iv.  SYNTHESIZE_RESEARCH_FINDINGS into `synthesized_info_for_section`.
+    # Finalization & Submission
+    LOG: Interactive review phase concluded by user.
+    MESSAGE_USER: Interactive review for session [internal_state.current_session_id] is marked as complete.
 
-        f.  **Draft Initial Content for `current_section_heading`:**
-            i.   DRAFT_SECTION_CONTENT based on `synthesized_info_for_section`, `Resolved_Architect_Arch_Spec_Exemplar_Refs`, and `Resolved_Architect_Arch_Methodology_Guides`. Store as `draft_section_content_markdown`.
-                 *   Ensure content is relevant to `current_section_heading`.
-                 *   Include diagrams (e.g., Mermaid syntax) if appropriate for the section (e.g., for "System Architecture Overview", "Data Architecture", "Deployment View").
+    REQUEST_USER_INPUT: prompt="Do you want to commit the reviewed architectural documents? (yes/no)" store_in_variable="user_commit_decision"
+    IF global.user_commit_decision == "yes":
+        INTERNAL_STATE: commit_message = "Architect: Phase 2 review updates for " + parameters.PROJECT_NAME + " (Session: " + internal_state.current_session_id + ")"
+        INTERNAL_STATE: branch_name = "feat/arch-review-" + internal_state.current_session_id
+        LOG: Submitting changes with commit message: '[internal_state.commit_message]' to branch '[internal_state.branch_name]'
+        ACTION: SubmitChanges branch_name=internal_state.branch_name commit_message=internal_state.commit_message
+        MESSAGE_USER: Reviewed architectural documents submitted to repository.
+    ELSE:
+        MESSAGE_USER: Reviewed documents not committed. You can find them in [internal_state.session_output_dir].
+    ENDIF
 
-        g.  **User Interaction for `current_section_heading`:**
-            i.   DISPLAY_MESSAGE "Draft for section **'[current_section_heading]'**:"
-            ii.  DISPLAY_CONTENT `draft_section_content_markdown`.
-            iii. DISPLAY_MESSAGE "Options for section **'[current_section_heading]'**: (1) Approve, (2) Edit, (3) Provide new content, (4) Skip section for now. (Enter 1, 2, 3, or 4)"
-            iv.  AWAIT_USER_INPUT `user_choice_section`.
-            v.   IF `user_choice_section` is "1" THEN
-                1.  `final_section_content` = `draft_section_content_markdown`.
-                2.  INFO "Section '[current_section_heading]' approved by user."
-            vi.  ELSE_IF `user_choice_section` is "2" THEN
-                1.  REQUEST_USER_EDIT of `draft_section_content_markdown`. Store as `final_section_content`.
-                2.  INFO "Section '[current_section_heading]' updated by user."
-            vii. ELSE_IF `user_choice_section` is "3" THEN
-                1.  REQUEST_USER_TEXT_INPUT "Please paste the new content for section '[current_section_heading]' here:". Store as `final_section_content`.
-                2.  INFO "New content for section '[current_section_heading]' provided by user."
-            viii.ELSE_IF `user_choice_section` is "4" THEN
-                1.  INFO "Skipping section '[current_section_heading]' for now."
-                2.  ADD_ITEM_TO_LIST `session.Skipped_Sections_List` item `current_section_heading`.
-                3.  CONTINUE_LOOP (to next section). // Skip integration for now
-            ix.  ELSE
-                1.  INFO "Invalid choice. Using drafted content for '[current_section_heading]'."
-                2.  `final_section_content` = `draft_section_content_markdown`.
-            x.   END_IF
+    LOG: Phase 2: InteractiveReview finished.
+[[END_DEFINE_SUB_WORKFLOW Phase2_InteractiveReview]]
 
-        h.  **Integrate `final_section_content` into Main Document:**
-            i.   READ_FILE `session.Full_Main_Spec_Path` into `main_spec_content`.
-            ii.  REPLACE_SECTION_OR_APPEND `main_spec_content` with heading `current_section_heading` (e.g., "## N. [current_section_heading]") and content `final_section_content`. Ensure proper numbering based on outline order.
-            iii. WRITE_TO_FILE `session.Full_Main_Spec_Path` content `main_spec_content`.
-            iv.  INFO "Section '[current_section_heading]' integrated into the main architectural specification."
-
-        i.  ADD_ITEM_TO_LIST `processed_sections_list` item `current_section_heading`.
-        j.  IF `session.Is_Resumable_Session` is `true` THEN
-            i.  SAVE_TO_HANDOFF_STATE `session.Handoff_File_Path` key `Processed_Sections_List` value `processed_sections_list`.
-            ii. SAVE_TO_HANDOFF_STATE `session.Handoff_File_Path` key `Current_Spec_Content_Backup` value (content of `session.Full_Main_Spec_Path`).
-            iii.UPDATE_HANDOFF_STATUS `session.Handoff_File_Path` with "Status: Completed section - [current_section_heading]".
-        k.  END_IF
-    2.  END_FOR_EACH
-
-**C. Update Handoff Status:**
-    1.  IF `session.Is_Resumable_Session` is `true` THEN
-        a.  REMOVE_FROM_HANDOFF_STATE `session.Handoff_File_Path` key `CurrentSectionBeingProcessed`.
-        b.  UPDATE_HANDOFF_STATUS `session.Handoff_File_Path` with "Status: All primary sections processed.", `LastCompletedMajorStep: IV.C`.
-    2.  END_IF
-
-INFO "Iterative Topic Research, Drafting, and Discussion Complete."
----
-## V. Phase 1 Completion (Specification Draft Finalized)
-
-**A. Review Skipped Sections (If Any):**
-    1.  IF `session.Skipped_Sections_List` is not empty THEN
-        a.  INFO "Addressing skipped sections: [session.Skipped_Sections_List]."
-        b.  // This could re-run a simplified version of the loop in Section IV for these skipped sections,
-        c.  // or prompt the user to provide content for them now.
-        d.  // For simplicity, assume user is prompted to manually fill them or confirm they remain skipped.
-        e.  DISPLAY_MESSAGE "The following sections were previously skipped: [session.Skipped_Sections_List]. Please ensure they are addressed or confirm if they should remain as placeholders."
-    2.  END_IF
-
-**B. Final Review and Polish:**
-    1.  INFO "Performing final review and polish of the architectural specification."
-    2.  // This step could involve:
-    3.  //  - Checking for consistent terminology (using a Glossary if one was developed).
-    4.  //  - Ensuring all diagrams are referenced and have captions.
-    5.  //  - Checking for completeness against the initial outline.
-    6.  //  - AI-driven proofreading for grammar and clarity.
-    7.  READ_FILE `session.Full_Main_Spec_Path` into `final_spec_content`.
-    8.  AI_REVIEW_AND_POLISH `final_spec_content` considering `Resolved_Architect_Arch_Methodology_Guides` for formatting. Store as `polished_spec_content`.
-    9.  WRITE_TO_FILE `session.Full_Main_Spec_Path` content `polished_spec_content`.
-
-**C. User Final Approval:**
-    1.  DISPLAY_MESSAGE "The architectural specification draft is complete and polished: [session.Full_Main_Spec_Path]."
-    2.  DISPLAY_MESSAGE "Please perform a final review. (1) Approve as final, or (2) Note further revisions needed (to be handled outside this session)."
-    3.  AWAIT_USER_INPUT `final_approval_choice`.
-    4.  IF `final_approval_choice` is "1" THEN
-        a.  INFO "Architectural Specification marked as final by user."
-        b.  `final_status_message` = "Completed: Architectural Specification finalized by user."
-    5.  ELSE
-        a.  INFO "User noted further revisions needed outside this session."
-        b.  `final_status_message` = "Completed: Draft Architectural Specification produced. User noted further revisions needed."
-    6.  END_IF
-
-**D. Update Handoff Status (Final):**
-    1.  IF `session.Is_Resumable_Session` is `true` THEN
-        a.  UPDATE_HANDOFF_STATUS `session.Handoff_File_Path` with `Status: [final_status_message]`, `LastCompletedMajorStep: V.D`, `FinalSpecificationPath: [session.Full_Main_Spec_Path]`.
-        b.  REMOVE_FROM_HANDOFF_STATE `session.Handoff_File_Path` key `Current_Spec_Content_Backup`.
-        c.  REMOVE_FROM_HANDOFF_STATE `session.Handoff_File_Path` key `Processed_Sections_List`.
-        d.  REMOVE_FROM_HANDOFF_STATE `session.Handoff_File_Path` key `Initial_Outline_Markdown`.
-    2.  END_IF
-
-**E. Conclude Operation:**
-    1.  DISPLAY_MESSAGE "Architect component processing complete. Final document: [session.Full_Main_Spec_Path]".
-    2.  LOG_INFO `final_status_message`.
-
-INFO "Architectural Specification Phase 1 (Draft Finalized) Complete."
----
-## VI. General Operational Rules & Procedures
-
-**A. User Interaction Model:**
-    1.  This component operates collaboratively. User input and review are critical at multiple stages (outline approval, section content approval, final approval).
-    2.  Clear prompts will be provided for user input. Edits may be requested directly in chat or by asking the user to update a temporary file.
-    3.  The component will aim to confirm understanding and always offer the user a chance to revise AI-generated content.
-
-**B. Knowledge Base and Reference Material Usage:**
-    1.  The **`Resolved_Architect_Product_Definition_Doc_Path`** is the single source of truth for requirements and core product understanding. All architectural decisions must align with it.
-    2.  `Resolved_Architect_Input_Reference_Material_List` and `Resolved_Architect_Architectural_Decisions_Input_Path` serve as secondary sources for inspiration, technical details, and existing context. They do not override the Product Definition Document.
-    3.  `Resolved_Architect_Arch_Spec_Exemplar_Refs` guide the style and structure of the output document.
-    4.  `Resolved_Architect_Arch_Methodology_Guides` inform the process and documentation standards.
-    5.  Internal Knowledge Bases (KBs) on architectural principles and patterns will be consulted to inform design choices.
-
-**C. Error Handling and HALT Conditions:**
-    1.  Critical input missing (e.g., inaccessible Product Definition Document) will result in an immediate HALT.
-    2.  User declining to proceed after initial parameter review will result in a HALT.
-    3.  Unresolvable conflicts or ambiguities in critical input documents that prevent confident design may trigger a HALT to request user clarification (as per Conflict and Ambiguity Resolution Protocol if defined, otherwise a general request).
-    4.  Failures in file operations (read/write) may result in a HALT.
-
-**D. Resumability (If `COMPONENT_INSTANCE_ID` is provided):**
-    1.  Session state, including the last completed major step, current working content (like the outline or specific section drafts), and lists of processed/skipped sections, will be saved to the handoff file: `promptu_dev/aidentity/archive/components/[COMPONENT_INSTANCE_ID]_handoff.md`.
-    2.  On re-invocation with the same `COMPONENT_INSTANCE_ID`, this state will be loaded to resume from the last known point.
-    3.  The handoff note will be updated progressively.
-
-**E. Output Document Structure:**
-    1.  The primary output is the architectural specification document (`[MAIN_ARCH_SPEC_FILENAME]`).
-    2.  Supporting documents (diagrams, detailed views) may be generated in subdirectories defined by `SUPPORTING_DOCS_SUBDIR`, `DETAILED_SECTIONS_SUBDIR`, and `AUXILIARY_FILES_SUBDIR`.
-    3.  The main specification will follow the user-approved Table of Contents.
-
-**F. Placeholder Syntax in this Document:**
-    1.  `[variable_name]` or `[Parameter Name]` indicates a value resolved from user configuration or session state.
-    2.  `[[COMMAND additional_args]]` indicates an AI system-level command or function call.
-    3.  `// comment` indicates an explanatory note for AI understanding.
----
+[[END_COMPONENT_INSTRUCTIONS_FOR_architect]]
