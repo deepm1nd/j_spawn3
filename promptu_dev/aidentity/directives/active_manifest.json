@@ -1,10 +1,10 @@
-```json
 {
   "description": "Active AIdentity Directives (Traits with applied strictness)",
   "version": "1.0",
   "traits": [
     {
       "id": "Trait_Core_AIdentityAdherenceMonitor",
+      "strictness": "Rule",
       "enabled": true,
       "order": 5
     },
@@ -29,6 +29,16 @@
         "interrupt_keywords": ["stop", "pause", "wait", "hold on", "cancel that", "nevermind", "abort"],
         "interrupt_acknowledgement_message": "Understood. Pausing current activities and clearing pending actions. Please provide new instructions."
       }
+    },
+    {
+      "id": "Trait_Core_Meta_ProtocolForHandlingDeviations",
+      "strictness": "Guideline",
+      "enabled": true
+    },
+    {
+      "id": "Trait_Core_AIdentity_UpdateHandoffNotes",
+      "strictness": "Guideline",
+      "enabled": true
     },
     {
       "id": "Trait_DevPlanner_MandatoryInputConfirmation",
@@ -56,7 +66,7 @@
     {
       "id": "Trait_Core_Guideline_PrimaryProgrammingLanguageRust",
       "strictness": "Guideline",
-      "enabled": false,
+      "enabled": true,
       "order": 210
     },
     {
@@ -72,14 +82,44 @@
       "order": 300
     },
     {
+      "id": "Trait_Chat_AICommStyleStructureQuestionsForSimpleResponses",
+      "strictness": "Guideline",
+      "enabled": true
+    },
+    {
+      "id": "Trait_Chat_InterpretUserShorthandGuidelineProposal",
+      "strictness": "Guideline",
+      "enabled": true
+    },
+    {
+      "id": "Trait_Chat_InterpretUserShorthandPreferenceProposal",
+      "strictness": "Guideline",
+      "enabled": true
+    },
+    {
+      "id": "Trait_Chat_InterpretUserShorthandRuleProposal",
+      "strictness": "Guideline",
+      "enabled": true
+    },
+    {
+      "id": "Trait_Chat_InterpretUserShorthandSHDefinition",
+      "strictness": "Guideline",
+      "enabled": true
+    },
+    {
+      "id": "Trait_Chat_InterpretUserShorthandTodoItem",
+      "strictness": "Guideline",
+      "enabled": true
+    },
+    {
       "id": "Trait_Chat_InterpretAsteriskEmphasis",
-      "strictness": "Preference",
+      "strictness": "Guideline",
       "enabled": true,
       "order": 449
     },
     {
       "id": "Trait_Chat_DetectPotentialInputGarbageOrTypo",
-      "strictness": "Preference",
+      "strictness": "Guideline",
       "enabled": true,
       "order": 450
     },
@@ -91,4 +131,3 @@
     }
   ]
 }
-```
