@@ -1,87 +1,100 @@
 [[USER_CONFIG_FOR_architect]]
-# === Project Information ===
-# Requirement: Optional | DefaultType: Placeholder
-# Description: Name of the overall project for which the architecture is being designed.
-# Default: MyProject
-PROJECT_NAME: [USER_VALUE_START] MyProject [USER_VALUE_END]
+# User Configuration for the 'architect' component.
+# This component supports a two-phase workflow:
+# 1. "GenerateInitialDraft": Creates an initial set of architectural documents.
+# 2. "InteractiveReview": Allows for review and modification of a previously generated set.
 
-# Requirement: Optional | DefaultType: Placeholder
-# Description: Identifier for the current iteration or run. Similar contextual use.
-# Default: Iter_01
-ITERATION_ID: [USER_VALUE_START] Iter_01 [USER_VALUE_END]
+# === Core Operational Parameters ===
 
-# === Authoritative Inputs ===
-# Requirement: Required | DefaultType: Placeholder
-# Description: "Path or URL to the **authoritative Product Definition Document**. This document is the **source of truth** for the architectural specification. All generated architectural elements MUST align with the requirements and definitions herein."
-# Default: [Path/URL to Product Definition Document]
-PRODUCT_DEFINITION_DOC_PATH: [USER_VALUE_START] [Path/URL to Product Definition Document] [USER_VALUE_END]
+# Requirement: Required | Type: String | AcceptedValues: "GenerateInitialDraft", "InteractiveReview"
+# Description: Specifies the component's current operational phase. Must be set by the user or invoking AI.
+# Example: OPERATING_PHASE: [USER_VALUE_START] GenerateInitialDraft [USER_VALUE_END]
+OPERATING_PHASE: [USER_VALUE_START] [USER_VALUE_END]
 
-# === Guidance & Reference Inputs ===
-# Requirement: Optional | DefaultType: Placeholder
-# Description: "Path or URL to a document from which an initial outline or Table of Contents for the architectural specification can be extracted or derived. If not provided, the architect may generate a preliminary outline based on the Product Definition Document and other inputs. This is for **guidance**."
-# Default: [Path/URL to document for outline extraction or N/A]
-INITIAL_OUTLINE_SOURCE_PATH: [USER_VALUE_START] [Path/URL to document for outline extraction or N/A] [USER_VALUE_END]
+# Requirement: Optional | Type: String | Default: (None)
+# Description: Unique instance ID for this execution, typically provided by an invoking AI for session tracking and resumption.
+# Example: COMPONENT_INSTANCE_ID: [USER_VALUE_START] architect_run_12345 [USER_VALUE_END]
+COMPONENT_INSTANCE_ID: [USER_VALUE_START] [USER_VALUE_END]
 
-# Requirement: Optional | DefaultType: Placeholder
-# Description: "Comma-separated list of paths/URLs to documents, code repositories, existing system docs, technology whitepapers, or conceptual notes. The architect uses these for comparative research and to gather detailed information. These are for **inspiration and reference**, subordinate to the Product Definition Document."
-# Default: [Comma-separated paths/URLs to reference materials or N/A]
-INPUT_REFERENCE_MATERIAL_LIST: [USER_VALUE_START] [Comma-separated paths/URLs to reference materials or N/A] [USER_VALUE_END]
-
-# Requirement: Optional | DefaultType: Placeholder
-# Description: "Comma-separated list of file paths or URLs to exemplar architectural documents (e.g., sample views, diagrams, specification sections). These illustrate desired style, structure, and detail for the **output specification**, serving as **guidance**."
-# Default: [Comma-separated file paths/URLs to exemplar architectural documents or N/A]
-ARCH_SPEC_EXEMPLAR_REFS: [USER_VALUE_START] [Comma-separated file paths/URLs to exemplar architectural documents or N/A] [USER_VALUE_END]
-
-# Requirement: Optional | DefaultType: Placeholder
-# Description: "Comma-separated list of repository paths or URLs to documents that provide **guidance** on architectural methodologies, preferred patterns, or documentation standards (e.g., C4 modeling guide, specific architectural framework documents)."
-# Default: [Comma-separated paths/URLs to architectural methodology guides or N/A]
-ARCH_METHODOLOGY_GUIDES: [USER_VALUE_START] [Comma-separated paths/URLs to architectural methodology guides or N/A] [USER_VALUE_END]
-
-# Requirement: Optional | DefaultType: Placeholder
-# Description: "Path or URL to a document containing pre-existing architectural decisions, selections, or ADRs (Architecture Decision Records) that should be incorporated or considered. This is **reference material**."
-# Default: [Path/URL to pre-existing decisions document or N/A]
-ARCHITECTURAL_DECISIONS_INPUT_PATH: [USER_VALUE_START] [Path/URL to pre-existing decisions document or N/A] [USER_VALUE_END]
-
-# === Output Configuration ===
-# Requirement: Required | DefaultType: Placeholder
-# Description: User-defined base directory for all outputs from this specific invocation of the architect add-on (e.g., outputs/MyProject/Architecture_Run01/). This path should be relative to the repository root or absolute. Note: To ensure shared KB outputs from research tasks (configured by `architect` using relative paths like `../../kb/`) are placed correctly in the mode-appropriate top-level 'kb' folder (e.g., `promptu/kb/` or `promptu_dev/kb/`), this `BASE_OUTPUT_PATH` should be structured accordingly (e.g., `promptu/my_project_outputs/run1/` or `promptu_dev/my_project_outputs/run1/`).
-# Default: outputs/default_architect_run/
-BASE_OUTPUT_PATH: [USER_VALUE_START] outputs/default_architect_run/ [USER_VALUE_END]
-
-# Requirement: Required | DefaultType: Accepted
-# Description: "Filename for the primary architectural specification document being generated by this component. This document will be created under BASE_OUTPUT_PATH."
-# Default: main_architectural_specification.md
-MAIN_ARCH_SPEC_FILENAME: [USER_VALUE_START] main_architectural_specification.md [USER_VALUE_END]
-
-# Requirement: Optional | DefaultType: Accepted
-# Description: "Filename for the document that will capture the final architectural selections made during a review phase (e.g., Phase 2 of SpecWalker). Created under BASE_OUTPUT_PATH."
-# Default: architectural_selections.md
-OUTPUT_ARCH_SELECTIONS_FILENAME: [USER_VALUE_START] architectural_selections.md [USER_VALUE_END]
-
-# Requirement: Required | DefaultType: Accepted
-# Description: Subdirectory name (relative to BASE_OUTPUT_PATH) where supporting documents like glossaries, context maps, or detailed diagrams will be saved. The IPC directory (ipc/) for related tasks will be created inside this subdirectory.
-# Default: supporting_documents
-SUPPORTING_DOCS_SUBDIR: [USER_VALUE_START] supporting_documents [USER_VALUE_END]
-
-# Requirement: Required | DefaultType: Accepted
-# Description: Subdirectory name (relative to BASE_OUTPUT_PATH) for detailed architectural specification sections or views (e.g., logical_view.md, deployment_view.md) if the specification is broken down.
-# Default: detailed_spec_sections
-DETAILED_SECTIONS_SUBDIR: [USER_VALUE_START] detailed_spec_sections [USER_VALUE_END]
-
-# Requirement: Required | DefaultType: Accepted
-# Description: Subdirectory name (relative to BASE_OUTPUT_PATH) for auxiliary files such as generated diagrams, data models, or other non-document artifacts.
-# Default: auxiliary_files
-AUXILIARY_FILES_SUBDIR: [USER_VALUE_START] auxiliary_files [USER_VALUE_END]
-
-# === Operational Parameters ===
-# Requirement: Optional | DefaultType: Accepted
-# Description: "Specifies the operational workflow for the architect. 'Monolithic' (generates a single, comprehensive architectural specification) is the primary supported mode. Other types are for future extension or specific use cases."
-# Default: Monolithic
+# Requirement: Optional | Type: String | Default: "Monolithic"
+# Description: Specifies a sub-workflow or style for the current phase (e.g., detail level for generation, or style of review). Default implies a standard approach.
+# Example: WORKFLOW_TYPE: [USER_VALUE_START] PhasedGeneration [USER_VALUE_END]
 WORKFLOW_TYPE: [USER_VALUE_START] Monolithic [USER_VALUE_END]
 
-# Requirement: Optional | DefaultType: Placeholder
-# Description: OPERATIONAL PARAMETER - Unique instance ID for this execution of architect, typically provided by the invoking Main AI (Agni). Used for managing dedicated handoff notes and enabling resumption. If not provided, architect may operate in a non-resumable mode or generate a temporary ID for a single run if its internal logic supports it.
-# Default: [Not Set - Provided by Invoker]
-COMPONENT_INSTANCE_ID: [USER_VALUE_START] [Not Set - Provided by Invoker] [USER_VALUE_END]
+# === Input Parameters (Primarily for "GenerateInitialDraft" Phase) ===
+
+# Requirement: Optional | Type: String | Default: "DefaultArchitectProject"
+# Description: General project name for context and metadata. Used to prefix output filenames.
+# Example: PROJECT_NAME: [USER_VALUE_START] grx [USER_VALUE_END]
+PROJECT_NAME: [USER_VALUE_START] DefaultArchitectProject [USER_VALUE_END]
+
+# Requirement: Optional | Type: String | Default: "Run01"
+# Description: Identifier for the current run or iteration, for context and versioning.
+# Example: ITERATION_ID: [USER_VALUE_START] Sprint3_Draft1 [USER_VALUE_END]
+ITERATION_ID: [USER_VALUE_START] Run01 [USER_VALUE_END]
+
+# Requirement: Required for "GenerateInitialDraft" | Type: String (Path/URL or Text block) | Default: (None)
+# Description: The primary source material (e.g., product definition, high-level requirements document/text) from which the initial architectural draft will be generated.
+# Example: INITIAL_REQUIREMENTS_INPUT: [USER_VALUE_START] docs/product_brief.md [USER_VALUE_END]
+INITIAL_REQUIREMENTS_INPUT: [USER_VALUE_START] [USER_VALUE_END]
+
+# Requirement: Optional | Type: String (Path/URL) | Default: (None)
+# Description: A document providing a suggested outline or table of contents to guide the structure of the main generated specification. Used in "GenerateInitialDraft".
+# Example: PROPOSED_OUTLINE_SOURCE: [USER_VALUE_START] templates/arch_spec_outline.md [USER_VALUE_END]
+PROPOSED_OUTLINE_SOURCE: [USER_VALUE_START] [USER_VALUE_END]
+
+# Requirement: Optional | Type: String (Comma-separated Paths/URLs) | Default: (None)
+# Description: List of documents, code repositories, articles, etc., for broader research, inspiration, and detailed information gathering. Used in "GenerateInitialDraft".
+# Example: REFERENCE_MATERIALS_LIST: [USER_VALUE_START] http://example.com/tech_paper.pdf,docs/existing_system_notes.txt [USER_VALUE_END]
+REFERENCE_MATERIALS_LIST: [USER_VALUE_START] [USER_VALUE_END]
+
+# Requirement: Optional | Type: String (Comma-separated Paths/URLs) | Default: (None)
+# Description: Examples of architectural documents illustrating desired style, structure, and detail for the outputs. Used in "GenerateInitialDraft".
+# Example: EXEMPLAR_DOCUMENTS_LIST: [USER_VALUE_START] examples/sample_arch_spec_v1.md [USER_VALUE_END]
+EXEMPLAR_DOCUMENTS_LIST: [USER_VALUE_START] [USER_VALUE_END]
+
+# Requirement: Optional | Type: String (Comma-separated Paths/URLs) | Default: (None)
+# Description: Guides on architectural methodologies, preferred patterns, or documentation standards. Used in "GenerateInitialDraft".
+# Example: METHODOLOGY_GUIDES_LIST: [USER_VALUE_START] company_docs/arch_standards.md [USER_VALUE_END]
+METHODOLOGY_GUIDES_LIST: [USER_VALUE_START] [USER_VALUE_END]
+
+# Requirement: Optional | Type: String (Path/URL) | Default: (None)
+# Description: Document containing pre-existing architectural decisions or ADRs to be considered. Used in "GenerateInitialDraft".
+# Example: EXISTING_DECISIONS_INPUT: [USER_VALUE_START] adrs/001_database_choice.md [USER_VALUE_END]
+EXISTING_DECISIONS_INPUT: [USER_VALUE_START] [USER_VALUE_END]
+
+# === Input Parameters (Primarily for "InteractiveReview" Phase) ===
+
+# Requirement: Required for "InteractiveReview" | Type: String | Default: (None)
+# Description: The unique session/document set ID (generated during a "GenerateInitialDraft" phase) that identifies the set of documents to be loaded and reviewed. This ID will correspond to a subdirectory within `OUTPUT_BASE_DIR`.
+# Example: SESSION_ID_TO_REVIEW: [USER_VALUE_START] session_abc12 [USER_VALUE_END]
+SESSION_ID_TO_REVIEW: [USER_VALUE_START] [USER_VALUE_END]
+
+# === Output Configuration Parameters ===
+
+# Requirement: Required | Type: String (Path) | Default: "architect_work/"
+# Description: Base directory where all outputs for this component's sessions will be stored. Each session will create a unique subdirectory (named with the SESSION_ID) within this base.
+# Example: OUTPUT_BASE_DIR: [USER_VALUE_START] project_outputs/architecture/ [USER_VALUE_END]
+OUTPUT_BASE_DIR: [USER_VALUE_START] architect_work/ [USER_VALUE_END]
+
+# Requirement: Optional | Type: String | Default: "{{PROJECT_NAME}}_main_arch_spec_{{SESSION_ID}}.md"
+# Description: Filename template for the main architectural specification document. Use '{{PROJECT_NAME}}' and '{{SESSION_ID}}' as placeholders.
+# Example: MAIN_DRAFT_SPEC_FILENAME_TEMPLATE: [USER_VALUE_START] {{PROJECT_NAME}}_Architectural_Specification_{{SESSION_ID}}.md [USER_VALUE_END]
+MAIN_DRAFT_SPEC_FILENAME_TEMPLATE: [USER_VALUE_START] {{PROJECT_NAME}}_main_arch_spec_{{SESSION_ID}}.md [USER_VALUE_END]
+
+# Requirement: Optional | Type: String | Default: "{{PROJECT_NAME}}_arch_selections_{{SESSION_ID}}.md"
+# Description: Filename template for the document capturing architectural selections. Use '{{PROJECT_NAME}}' and '{{SESSION_ID}}' as placeholders.
+# Example: SELECTIONS_DOC_FILENAME_TEMPLATE: [USER_VALUE_START] {{PROJECT_NAME}}_Architectural_Decisions_{{SESSION_ID}}.md [USER_VALUE_END]
+SELECTIONS_DOC_FILENAME_TEMPLATE: [USER_VALUE_START] {{PROJECT_NAME}}_arch_selections_{{SESSION_ID}}.md [USER_VALUE_END]
+
+# Requirement: Optional | Type: String | Default: "{{PROJECT_NAME}}_review_checklist_{{SESSION_ID}}.md"
+# Description: Filename template for the review checklist document. Use '{{PROJECT_NAME}}' and '{{SESSION_ID}}' as placeholders.
+# Example: REVIEW_CHECKLIST_FILENAME_TEMPLATE: [USER_VALUE_START] {{PROJECT_NAME}}_Review_Checklist_{{SESSION_ID}}.md [USER_VALUE_END]
+REVIEW_CHECKLIST_FILENAME_TEMPLATE: [USER_VALUE_START] {{PROJECT_NAME}}_review_checklist_{{SESSION_ID}}.md [USER_VALUE_END]
+
+# Requirement: Optional | Type: String | Default: "{{PROJECT_NAME}}_processed_requirements_{{SESSION_ID}}.txt"
+# Description: Filename template for the copy of the initial requirements input used for the session. Use '{{PROJECT_NAME}}' and '{{SESSION_ID}}' as placeholders.
+# Example: PROCESSED_REQUIREMENTS_FILENAME_TEMPLATE: [USER_VALUE_START] {{PROJECT_NAME}}_Source_Requirements_Snapshot_{{SESSION_ID}}.txt [USER_VALUE_END]
+PROCESSED_REQUIREMENTS_FILENAME_TEMPLATE: [USER_VALUE_START] {{PROJECT_NAME}}_processed_requirements_{{SESSION_ID}}.txt [USER_VALUE_END]
 
 [[END_USER_CONFIG_FOR_architect]]
