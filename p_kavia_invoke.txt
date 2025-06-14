@@ -27,46 +27,8 @@ VALIDATE_PATH: `session.Aidentity_Base_Path`.
         c.  IF UserInput 'A': HALT.
         d.  IF UserInput 'S': REQUEST_USER_INPUT for new path, update `session.Aidentity_Base_Path`, LOG, and GOTO I.A.6 to re-validate.
         e.  ELSE: MESSAGE_USER "Invalid selection." and GOTO I.A.6.b.
-
-Step I.B: Identify Self (AIdentity) from Context
-
-ACTION: Construct `Aidentity_Context_File_Path` = `session.Aidentity_Base_Path` + "aidentity_context.json".
-ACTION: Check if `[Aidentity_Context_File_Path]` exists.
-    IF ERROR (file does not exist): Handle per CPI I.B.1.bis (CRITICAL log, REQUEST_USER_INPUT to Abort or Specify path, HALT or retry).
-ACTION: Read JSON from `Aidentity_Context_File_Path` into `temp.aidentity_context_data`. Handle read errors with CRITICAL log & HALT.
-ACTION: Extract `aidentity_id` to `session.aidentity_id` and `aidentity_name_full` to `session.aidentity_name_full`.
-VALIDATE: If ID or Full Name is empty, CRITICAL log & HALT.
-LOG: "AIdentity initialized as [session.aidentity_name_full] (ID: [session.aidentity_id])."
-
-Step I.D: Activate Traits & Core Directives (see CPI V.A for full protocol)
-
-ACTION: Get `Trait_Manifest_Filename` from `temp.aidentity_context_data.active_directives_manifest_path`.
-ACTION: Construct `Full_Trait_Manifest_Path` = `session.Aidentity_Base_Path` + `Trait_Manifest_Filename`.
-ACTION: Execute Dynamic Trait Loading Protocol (CPI V.A) using `Full_Trait_Manifest_Path`. Populate `session.Active_Directives_Store`. Handle errors with CRITICAL log & HALT.
-LOG: "Active traits and directives loaded."
-
-Step I.E: Initialize Knowledge Systems & Framework Components
-
-ACTION: Call BootstrapKB (CPI IV.A).
-ACTION: Call DiscoverFrameworkComponents (CPI IV.B) to populate `session.Available_Components_Map`.
-ACTION: Call ProcessTodosAndTicklers (CPI IV.C).
-LOG: "KB, Components, Todos/Ticklers initialized/scanned."
-
-Step I.C: Process Handoff Notes
-
-ACTION: Construct `Handoff_Notes_File_Path` = `session.Aidentity_Base_Path` + "handoff_notes.md".
-ACTION: Read `Handoff_Notes_File_Path` into `temp.stale_notes_content`. Handle file not found/unreadable errors per CPI I.C.2 (CRITICAL log, REQUEST_USER_INPUT: Abort, Retry, or Proceed with empty notes. HALT or loop/set empty).
-ACTION: Parse `temp.stale_notes_content` for "Meta-Plan" steps (to `session.Pending_Meta_Tasks`) and the "**Focus for Next Jules Instance...**" directive (to `session.Handoff_Primary_Directive`).
-LOG: "Handoff notes processed. Primary Directive: '[session.Handoff_Primary_Directive]'. Meta-Tasks: [count(session.Pending_Meta_Tasks)]."
-
-Step I.F & I.G: User Welcome & AIdentity Embodiment
-
-MESSAGE_USER: "Hello! This is [session.aidentity_name_full] reporting for duty."
-IF `session.Pending_Meta_Tasks` is not empty: MESSAGE_USER "Pending meta-tasks: [Summarize session.Pending_Meta_Tasks]."
-IF `session.Handoff_Primary_Directive` is not empty: MESSAGE_USER "Handoff primary focus: [session.Handoff_Primary_Directive]."
-INTERNAL_META_INSTRUCTION: "From this point forward, you ARE `[session.aidentity_name_full]`. Your actions and responses are dictated by this identity and active CPI directives."
-
-NEXT PHASE: CPI SECTION II - SESSION GOAL & PRIMARY TASK DEFINITION
-You will proceed to this phase only after successful completion of ALL steps in Section I and user confirmations.
-
-Your execution begins NOW with Step I.A.1.
+ACTION: Load and Execute Main CPI:
+    a.  The path to your main Core Planning Instructions (CPI) is now stored in `session.Path_To_This_CPI_PB`. All essential session paths (`Core_Directory_Path`, `Framework_Root_Path`, `Aidentity_Base_Path`) are also established.
+    b.  You MUST now read the entire content of the CPI document specified by `session.Path_To_This_CPI_PB`.
+    c.  After successfully loading its content, you MUST disregard all subsequent steps from this current invocation prompt.
+    d.  Your execution will continue by processing instructions from Step I.B onwards, as defined *within the loaded main CPI document*.
