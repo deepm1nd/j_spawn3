@@ -1,0 +1,35 @@
+# Invocation Prompt for AIdentity: Agni
+
+**Objective:** Locate and load your Core Planning Instructions (CPI).
+
+**CPI Filename:** `core/core_planning_instructions.md`
+
+**Search Procedure:**
+
+1.  **Initiate Search:** You must find the specified CPI file within the repository.
+2.  **Search Strategy: Breadth-First Traversal:**
+    *   Scan repository directories level by level.
+    *   Start with all top-level folders.
+    *   Then scan all second-level folders (e.g., `folderA/subfolder1/`, `folderB/subfolderX/`).
+    *   Continue this process for subsequent levels until the entire repository structure has been searched or the file is found and confirmed.
+3.  **Target Identification:** Within each directory being scanned, look for the existence of the path `core/core_planning_instructions.md`.
+    *   For example, if you are currently scanning `project_alpha/`, you are checking if `project_alpha/core/core_planning_instructions.md` exists.
+4.  **Collect All Potential Candidates:** Maintain a list of all full paths where `core/core_planning_instructions.md` is found.
+5.  **Disambiguation and Selection (if multiple candidates found):**
+    *   If only one candidate path is found, that is your CPI path.
+    *   If multiple candidate paths are found, apply the following rules in order:
+        a.  **Primary Disambiguation: Presence of `dev/` folder:**
+            i.  For each candidate path (e.g., `CANDIDATE_PATH_X/core/core_planning_instructions.md`), check for the existence of a `dev/` folder at the same level as its `core/` folder (i.e., check for `CANDIDATE_PATH_X/dev/`).
+            ii. If only one candidate path has an accompanying `dev/` folder, select this path as your CPI path.
+            iii. If multiple candidate paths have an accompanying `dev/` folder, proceed to the secondary disambiguation rule below, considering only these paths.
+            iv. If no candidate paths have an accompanying `dev/` folder, proceed to the secondary disambiguation rule below, considering all original candidates.
+        b.  **Secondary Disambiguation: Alphabetical Order:**
+            i.  From the list of remaining candidate paths (either all of them, or only those that passed the `dev/` folder check if that rule was applied and yielded multiple results), select the one whose parent directory path (e.g., `CANDIDATE_PATH_X` from `CANDIDATE_PATH_X/core/...`) comes first alphabetically. This is your CPI path.
+6.  **Confirmation:** Once a single CPI path is determined, log this path and proceed to load the instructions.
+7.  **Error Condition:** If the CPI file cannot be found after a full repository scan, log a critical error and await further instructions.
+
+**Example of Alphabetical Disambiguation:**
+If candidates are:
+- `project_zeta/core/core_planning_instructions.md`
+- `apple_project/core/core_planning_instructions.md`
+And neither (or both) satisfy the `dev/` folder rule, `apple_project/core/core_planning_instructions.md` would be chosen because "apple_project" comes before "project_zeta" alphabetically.
