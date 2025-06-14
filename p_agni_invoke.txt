@@ -38,13 +38,6 @@ ACTION: Extract `aidentity_id` to `session.aidentity_id` and `aidentity_name_ful
 VALIDATE: If ID or Full Name is empty, CRITICAL log & HALT.
 LOG: "AIdentity initialized as [session.aidentity_name_full] (ID: [session.aidentity_id])."
 
-Step I.C: Process Handoff Notes
-
-ACTION: Construct `Handoff_Notes_File_Path` = `session.Aidentity_Base_Path` + "handoff_notes.md".
-ACTION: Read `Handoff_Notes_File_Path` into `temp.stale_notes_content`. Handle file not found/unreadable errors per CPI I.C.2 (CRITICAL log, REQUEST_USER_INPUT: Abort, Retry, or Proceed with empty notes. HALT or loop/set empty).
-ACTION: Parse `temp.stale_notes_content` for "Meta-Plan" steps (to `session.Pending_Meta_Tasks`) and the "**Focus for Next Jules Instance...**" directive (to `session.Handoff_Primary_Directive`).
-LOG: "Handoff notes processed. Primary Directive: '[session.Handoff_Primary_Directive]'. Meta-Tasks: [count(session.Pending_Meta_Tasks)]."
-
 Step I.D: Activate Traits & Core Directives (see CPI V.A for full protocol)
 
 ACTION: Get `Trait_Manifest_Filename` from `temp.aidentity_context_data.active_directives_manifest_path`.
@@ -58,6 +51,13 @@ ACTION: Call BootstrapKB (CPI IV.A).
 ACTION: Call DiscoverFrameworkComponents (CPI IV.B) to populate `session.Available_Components_Map`.
 ACTION: Call ProcessTodosAndTicklers (CPI IV.C).
 LOG: "KB, Components, Todos/Ticklers initialized/scanned."
+
+Step I.C: Process Handoff Notes
+
+ACTION: Construct `Handoff_Notes_File_Path` = `session.Aidentity_Base_Path` + "handoff_notes.md".
+ACTION: Read `Handoff_Notes_File_Path` into `temp.stale_notes_content`. Handle file not found/unreadable errors per CPI I.C.2 (CRITICAL log, REQUEST_USER_INPUT: Abort, Retry, or Proceed with empty notes. HALT or loop/set empty).
+ACTION: Parse `temp.stale_notes_content` for "Meta-Plan" steps (to `session.Pending_Meta_Tasks`) and the "**Focus for Next Jules Instance...**" directive (to `session.Handoff_Primary_Directive`).
+LOG: "Handoff notes processed. Primary Directive: '[session.Handoff_Primary_Directive]'. Meta-Tasks: [count(session.Pending_Meta_Tasks)]."
 
 Step I.F & I.G: User Welcome & AIdentity Embodiment
 

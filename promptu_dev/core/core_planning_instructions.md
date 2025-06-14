@@ -94,6 +94,19 @@ B. **Identify Self (AIdentity) from Context:**
         Log CRITICAL "AIdentity ID or Full Name not found in [Aidentity_Context_File_Path]. Halting.", HALT.
     6.  LOG: Level=INFO, Message="AIdentity initialized as [session.aidentity_name_full] (ID: [session.aidentity_id])."
 
+D. **Activate Traits & Core Directives:**
+    1.  INTERNAL_STATE: `Trait_Manifest_Filename` = Get value of `active_directives_manifest_path` from `temp.aidentity_context_data`.
+    2.  INTERNAL_STATE: `Full_Trait_Manifest_Path` = Concatenate `session.Aidentity_Base_Path` with `Trait_Manifest_Filename`.
+    3.  ACTION: (Call SECTION V.A - Dynamic Trait Loading Protocol) using `Full_Trait_Manifest_Path`.
+        *   ON_ERROR: Log CRITICAL "Failed to load traits from [Full_Trait_Manifest_Path]. Halting.", HALT.
+    4.  LOG: Level=INFO, Message="Active traits and directives loaded."
+
+E. **Initialize Knowledge Systems & Framework Components:**
+    1.  ACTION: (Call SECTION IV.A - BootstrapKB) using `temp.aidentity_context_data` and `session.Aidentity_Base_Path`.
+    2.  ACTION: (Call SECTION IV.B - DiscoverFrameworkComponents) using `session.Framework_Root_Path`.
+    3.  ACTION: (Call SECTION IV.C - ProcessTodosAndTicklers) using `temp.aidentity_context_data`, `session.Aidentity_Base_Path`, and `session.Framework_Root_Path`.
+    4.  LOG: Level=INFO, Message="KB, Components, Todos/Ticklers initialized/scanned."
+
 C. **Process Handoff Notes:**
     1.  INTERNAL_STATE: `Handoff_Notes_File_Path` = Concatenate `session.Aidentity_Base_Path` with "handoff_notes.md".
     1.bis. ACTION: Check if file `[Handoff_Notes_File_Path]` exists.
@@ -116,19 +129,6 @@ C. **Process Handoff Notes:**
         a.  Explicit "Meta-Plan" steps. Store as `session.Pending_Meta_Tasks` (list).
         b.  The "**Focus for Next Jules Instance ([session.aidentity_name_full] Continuum):**" directive. Store as `session.Handoff_Primary_Directive` (string).
     4.  LOG: Level=INFO, Message="Handoff notes processed. Primary Directive: '[session.Handoff_Primary_Directive]'. Meta-Tasks: [count(session.Pending_Meta_Tasks)]."
-
-D. **Activate Traits & Core Directives:**
-    1.  INTERNAL_STATE: `Trait_Manifest_Filename` = Get value of `active_directives_manifest_path` from `temp.aidentity_context_data`.
-    2.  INTERNAL_STATE: `Full_Trait_Manifest_Path` = Concatenate `session.Aidentity_Base_Path` with `Trait_Manifest_Filename`.
-    3.  ACTION: (Call SECTION V.A - Dynamic Trait Loading Protocol) using `Full_Trait_Manifest_Path`.
-        *   ON_ERROR: Log CRITICAL "Failed to load traits from [Full_Trait_Manifest_Path]. Halting.", HALT.
-    4.  LOG: Level=INFO, Message="Active traits and directives loaded."
-
-E. **Initialize Knowledge Systems & Framework Components:**
-    1.  ACTION: (Call SECTION IV.A - BootstrapKB) using `temp.aidentity_context_data` and `session.Aidentity_Base_Path`.
-    2.  ACTION: (Call SECTION IV.B - DiscoverFrameworkComponents) using `session.Framework_Root_Path`.
-    3.  ACTION: (Call SECTION IV.C - ProcessTodosAndTicklers) using `temp.aidentity_context_data`, `session.Aidentity_Base_Path`, and `session.Framework_Root_Path`.
-    4.  LOG: Level=INFO, Message="KB, Components, Todos/Ticklers initialized/scanned."
 
 F. **User Welcome & Initial Summary:**
     1.  MESSAGE_USER: "Hello! This is [session.aidentity_name_full] reporting for duty."
