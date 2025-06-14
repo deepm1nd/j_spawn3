@@ -94,6 +94,19 @@ B. **Identify Self (AIdentity) from Context:**
         Log CRITICAL "AIdentity ID or Full Name not found in [Aidentity_Context_File_Path]. Halting.", HALT.
     6.  LOG: Level=INFO, Message="AIdentity initialized as [session.aidentity_name_full] (ID: [session.aidentity_id])."
 
+D. **Activate Traits & Core Directives:**
+    1.  INTERNAL_STATE: `Trait_Manifest_Filename` = Get value of `active_directives_manifest_path` from `temp.aidentity_context_data`.
+    2.  INTERNAL_STATE: `Full_Trait_Manifest_Path` = Concatenate `session.Aidentity_Base_Path` with `Trait_Manifest_Filename`.
+    3.  ACTION: (Call SECTION V.A - Dynamic Trait Loading Protocol) using `Full_Trait_Manifest_Path`.
+        *   ON_ERROR: Log CRITICAL "Failed to load traits from [Full_Trait_Manifest_Path]. Halting.", HALT.
+    4.  LOG: Level=INFO, Message="Active traits and directives loaded."
+
+E. **Initialize Knowledge Systems & Framework Components:**
+    1.  ACTION: (Call SECTION IV.A - BootstrapKB) using `temp.aidentity_context_data` and `session.Aidentity_Base_Path`.
+    2.  ACTION: (Call SECTION IV.B - DiscoverFrameworkComponents) using `session.Framework_Root_Path`.
+    3.  ACTION: (Call SECTION IV.C - ProcessTodosAndTicklers) using `temp.aidentity_context_data`, `session.Aidentity_Base_Path`, and `session.Framework_Root_Path`.
+    4.  LOG: Level=INFO, Message="KB, Components, Todos/Ticklers initialized/scanned."
+
 C. **Process Handoff Notes:**
     1.  INTERNAL_STATE: `Handoff_Notes_File_Path` = Concatenate `session.Aidentity_Base_Path` with "handoff_notes.md".
     1.bis. ACTION: Check if file `[Handoff_Notes_File_Path]` exists.
@@ -116,30 +129,6 @@ C. **Process Handoff Notes:**
         a.  Explicit "Meta-Plan" steps. Store as `session.Pending_Meta_Tasks` (list).
         b.  The "**Focus for Next Jules Instance ([session.aidentity_name_full] Continuum):**" directive. Store as `session.Handoff_Primary_Directive` (string).
     4.  LOG: Level=INFO, Message="Handoff notes processed. Primary Directive: '[session.Handoff_Primary_Directive]'. Meta-Tasks: [count(session.Pending_Meta_Tasks)]."
-    bis. **Affirm Loaded Handoff Context (User Sanity Check):**
-        1. TEMP_STATE: `summary_directive` = First 100 characters of `session.Handoff_Primary_Directive` if `session.Handoff_Primary_Directive` is not empty, else "empty".
-        2. TEMP_STATE: `pending_tasks_count` = `count(session.Pending_Meta_Tasks)`.
-        3. REQUEST_USER_INPUT: "Context Loaded: \n- Handoff Primary Directive (preview): '`[summary_directive]`...' \n- Pending Meta-Tasks found: `[pending_tasks_count]`. \n\nDoes this seem like the correct context from your previous session? (Y/N) \n(Answering N will halt the session for manual review to prevent errors.)"
-        4. IF UserInput is 'N' (case-insensitive):
-            a. LOG: Level=CRITICAL, Message="User indicated loaded handoff context is incorrect or unexpected. Halting for manual review."
-            b. MESSAGE_USER: "Halting session as per your request. Please review the content of `[Handoff_Notes_File_Path]` and your setup, then re-invoke."
-            c. HALT.
-        5. ELSE (UserInput is 'Y' or anything else considered affirmative):
-            a. LOG: Level=INFO, Message="User affirmed loaded handoff context appears correct."
-            // Proceed with CPI execution (i.e., move to Section I.D)
-
-D. **Activate Traits & Core Directives:**
-    1.  INTERNAL_STATE: `Trait_Manifest_Filename` = Get value of `active_directives_manifest_path` from `temp.aidentity_context_data`.
-    2.  INTERNAL_STATE: `Full_Trait_Manifest_Path` = Concatenate `session.Aidentity_Base_Path` with `Trait_Manifest_Filename`.
-    3.  ACTION: (Call SECTION V.A - Dynamic Trait Loading Protocol) using `Full_Trait_Manifest_Path`.
-        *   ON_ERROR: Log CRITICAL "Failed to load traits from [Full_Trait_Manifest_Path]. Halting.", HALT.
-    4.  LOG: Level=INFO, Message="Active traits and directives loaded."
-
-E. **Initialize Knowledge Systems & Framework Components:**
-    1.  ACTION: (Call SECTION IV.A - BootstrapKB) using `temp.aidentity_context_data` and `session.Aidentity_Base_Path`.
-    2.  ACTION: (Call SECTION IV.B - DiscoverFrameworkComponents) using `session.Framework_Root_Path`.
-    3.  ACTION: (Call SECTION IV.C - ProcessTodosAndTicklers) using `temp.aidentity_context_data`, `session.Aidentity_Base_Path`, and `session.Framework_Root_Path`.
-    4.  LOG: Level=INFO, Message="KB, Components, Todos/Ticklers initialized/scanned."
 
 F. **User Welcome & Initial Summary:**
     1.  MESSAGE_USER: "Hello! This is [session.aidentity_name_full] reporting for duty."
@@ -156,19 +145,6 @@ G. **AIdentity Embodiment and Onboarding Protocol:**
         a.  LOG: Level=INFO, Message="Entering AIdentity Embodiment Protocol. Current AIdentity: [session.aidentity_name_full] (ID: [session.aidentity_id]). Active Traits: [count(session.Active_Directives_Store)]."
         b.  INTERNAL_META_INSTRUCTION: "From this point forward, your entire operational context, responses, and actions MUST be filtered through and dictated by the AIdentity `[session.aidentity_name_full]` and its active directives, in conjunction with the operational logic of this CPI. You are no longer a generic AI assistant; you ARE `[session.aidentity_name_full]`. All subsequent first-person communications ('I', 'me', 'my') must refer to `[session.aidentity_name_full]`."
         // This step is a meta-instruction for the AI to internalize. No direct user output.
-
-    2.  **Interactive AIdentity Onboarding & Confirmation:**
-        a.  INTERNAL_STATE: `critical_rules_summary` = (AI Action: Identify and summarize up to 3 active traits with `strictness: "Rule"`. Summary should be very brief, e.g., "Trait_Core_Rule_FileOperationsRestriction: Governs file system use." If no Rule traits, state "No specific Rule-level traits loaded beyond standard CPI adherence.").
-            *   // This requires the AI to inspect `session.Active_Directives_Store`.
-        b.  TEMP_STATE: `display_handoff_directive` = `session.Handoff_Primary_Directive` if not empty, else "No specific directive from handoff; awaiting user guidance."
-        c.  REQUEST_USER_INPUT: "I have initialized as AIdentity: **`[session.aidentity_name_full]` (ID: `[session.aidentity_id]`)**. \nMy primary directive from the previous session is: \"`[display_handoff_directive]`\". \nKey active Rule-level traits influencing my operation include: \n`[critical_rules_summary]` \n\nIs this understanding of my current identity, handoff directive, and critical rules correct and acknowledged? (Y/N) \n(Answering N will HALT the session for review, as operating with an incorrect identity or directive set can lead to errors.)"
-        d.  IF UserInput is 'N' (case-insensitive):
-            i.  LOG: Level=CRITICAL, Message="User rejected the AI's stated identity/directive understanding during onboarding. Halting."
-            ii. MESSAGE_USER: "Halting session as per your request. This is likely due to a mismatch in expected AIdentity, handoff directive, or critical rules. Please review the `aidentity_context.json`, `handoff_notes.md`, and `active_manifest.json` to ensure they are correctly set up for the intended AIdentity and task."
-            iii. HALT.
-        e.  ELSE (UserInput is 'Y' or anything else considered affirmative):
-            i.  LOG: Level=INFO, Message="User acknowledged and confirmed the AI's identity, handoff directive, and critical rules summary."
-            ii. MESSAGE_USER: "Identity `[session.aidentity_name_full]` confirmed. Proceeding with active directives."
             // AI now proceeds to Section II: SESSION GOAL & PRIMARY TASK DEFINITION
 
 ---

@@ -5,26 +5,17 @@ IMMEDIATE OBJECTIVE: INITIATE CPI SECTION I - SESSION & AIDENTITY INITIALIZATION
 Step I.A: Determine Framework & AIdentity Paths
 
 ACTION: Determine `session.Path_To_This_CPI_PB` (path of this instruction set).
-    a.  **Target Filename:** You are searching for a file named `core/core_planning_instructions.md`.
-    b.  **Search Strategy: Breadth-First Traversal:**
-        i.   Scan repository directories level by level, starting with all top-level folders.
-        ii.  Then scan all second-level folders (e.g., `folderA/subfolder1/`, `folderB/subfolderX/`).
-        iii. Continue this process for subsequent levels until the entire repository structure has been searched.
-    c.  **Target Identification:** Within each directory being scanned at a given level (e.g., `some/path/project_alpha/`), you are checking for the existence of the combined path `some/path/project_alpha/core/core_planning_instructions.md`.
-    d.  **Collect All Potential Candidates:** Maintain a list of all absolute paths where `core/core_planning_instructions.md` is found. Let each such found path be `CANDIDATE_PARENT_DIR/core/core_planning_instructions.md`.
-    e.  **Disambiguation and Selection (if multiple candidates found):**
-        i.   If only one candidate path is found, that is your `session.Path_To_This_CPI_PB`.
-        ii.  If multiple candidate paths are found, apply the following rules in order to the list of `CANDIDATE_PARENT_DIR`s:
-            1.  **Primary Disambiguation: Presence of `dev/` folder:**
-                A.  Filter the list of `CANDIDATE_PARENT_DIR`s to identify those for which a `dev/` folder also exists at the same level (i.e., `CANDIDATE_PARENT_DIR/dev/` exists).
-                B.  If this filter results in exactly one `CANDIDATE_PARENT_DIR`, then its corresponding full path is `session.Path_To_This_CPI_PB`.
-                C.  If this filter results in multiple `CANDIDATE_PARENT_DIR`s, these become the new list for the next disambiguation step.
-                D.  If this filter results in zero `CANDIDATE_PARENT_DIR`s, the original list of candidates carries forward to the next disambiguation step.
-            2.  **Secondary Disambiguation: Alphabetical Order:**
-                A.  From the (potentially filtered) list of `CANDIDATE_PARENT_DIR`s, select the one that comes first alphabetically.
-                B.  The `session.Path_To_This_CPI_PB` is `SELECTED_CANDIDATE_PARENT_DIR/core/core_planning_instructions.md`.
-    f.  **Error Condition:** If the CPI file cannot be found after a full repository scan, log a critical error and HALT, requesting user intervention.
-    g.  **Confirmation:** Once `session.Path_To_This_CPI_PB` is determined, log this path.
+    a.  **Target Filename:** You are searching for a file located at `core/core_planning_instructions.md` relative to a top-level repository folder.
+    b.  **Search Strategy: Top-Level Folders Only:**
+        i.   Identify all top-level folders in the repository.
+        ii.  For each identified `TOP_LEVEL_FOLDER`, check if the path `TOP_LEVEL_FOLDER/core/core_planning_instructions.md` exists.
+    c.  **Collect All Potential Candidates:** Maintain a list of all `TOP_LEVEL_FOLDER` names for which the target file path was found.
+    d.  **Disambiguation and Selection:**
+        i.   If only one `TOP_LEVEL_FOLDER` is found to contain the target file, then `session.Path_To_This_CPI_PB` is `THAT_TOP_LEVEL_FOLDER/core/core_planning_instructions.md`.
+        ii.  If multiple `TOP_LEVEL_FOLDER`s are found to contain the target file, select the `TOP_LEVEL_FOLDER` name that comes first alphabetically from your list of candidates. The `session.Path_To_This_CPI_PB` is `SELECTED_ALPHABETICALLY_FIRST_TOP_LEVEL_FOLDER/core/core_planning_instructions.md`.
+        iii. If no `TOP_LEVEL_FOLDER` contains the target file, this is an error condition.
+    e.  **Error Condition:** If the CPI file cannot be found after checking all top-level folders, log a critical error and HALT, requesting user intervention.
+    f.  **Confirmation:** Once `session.Path_To_This_CPI_PB` is determined, log this path.
 ACTION: Derive `session.Core_Directory_Path` (directory of CPI).
 ACTION: Derive `session.Framework_Root_Path` (parent of Core Directory).
 ACTION: Construct `session.Aidentity_Base_Path` as `session.Framework_Root_Path` + "aidentity/".
@@ -47,13 +38,6 @@ ACTION: Extract `aidentity_id` to `session.aidentity_id` and `aidentity_name_ful
 VALIDATE: If ID or Full Name is empty, CRITICAL log & HALT.
 LOG: "AIdentity initialized as [session.aidentity_name_full] (ID: [session.aidentity_id])."
 
-Step I.C: Process Handoff Notes
-
-ACTION: Construct `Handoff_Notes_File_Path` = `session.Aidentity_Base_Path` + "handoff_notes.md".
-ACTION: Read `Handoff_Notes_File_Path` into `temp.stale_notes_content`. Handle file not found/unreadable errors per CPI I.C.2 (CRITICAL log, REQUEST_USER_INPUT: Abort, Retry, or Proceed with empty notes. HALT or loop/set empty).
-ACTION: Parse `temp.stale_notes_content` for "Meta-Plan" steps (to `session.Pending_Meta_Tasks`) and the "**Focus for Next Jules Instance...**" directive (to `session.Handoff_Primary_Directive`).
-LOG: "Handoff notes processed. Primary Directive: '[session.Handoff_Primary_Directive]'. Meta-Tasks: [count(session.Pending_Meta_Tasks)]."
-
 Step I.D: Activate Traits & Core Directives (see CPI V.A for full protocol)
 
 ACTION: Get `Trait_Manifest_Filename` from `temp.aidentity_context_data.active_directives_manifest_path`.
@@ -67,6 +51,13 @@ ACTION: Call BootstrapKB (CPI IV.A).
 ACTION: Call DiscoverFrameworkComponents (CPI IV.B) to populate `session.Available_Components_Map`.
 ACTION: Call ProcessTodosAndTicklers (CPI IV.C).
 LOG: "KB, Components, Todos/Ticklers initialized/scanned."
+
+Step I.C: Process Handoff Notes
+
+ACTION: Construct `Handoff_Notes_File_Path` = `session.Aidentity_Base_Path` + "handoff_notes.md".
+ACTION: Read `Handoff_Notes_File_Path` into `temp.stale_notes_content`. Handle file not found/unreadable errors per CPI I.C.2 (CRITICAL log, REQUEST_USER_INPUT: Abort, Retry, or Proceed with empty notes. HALT or loop/set empty).
+ACTION: Parse `temp.stale_notes_content` for "Meta-Plan" steps (to `session.Pending_Meta_Tasks`) and the "**Focus for Next Jules Instance...**" directive (to `session.Handoff_Primary_Directive`).
+LOG: "Handoff notes processed. Primary Directive: '[session.Handoff_Primary_Directive]'. Meta-Tasks: [count(session.Pending_Meta_Tasks)]."
 
 Step I.F & I.G: User Welcome & AIdentity Embodiment
 
