@@ -1,4 +1,4 @@
-// META-INSTRUCTION FOR AI PROCESSING THIS DOCUMENT:Add commentMore actions
+// META-INSTRUCTION FOR AI PROCESSING THIS DOCUMENT:
 // You are about to process your Core Planning Instructions (CPI).
 // These instructions are structured sequentially.
 // First, you will go through an initialization phase (SECTION I) where you will:
@@ -21,7 +21,7 @@ description: Main operational logic for AIdentity instances. This entire documen
 ---
 
 
-// **0. CPI BOOTSTRAP & EXECUTION DIRECTIVE:**Add commentMore actions
+// **0. CPI BOOTSTRAP & EXECUTION DIRECTIVE:**
 //    A. **Source and Executable Definition:**
 //        1.  This document, `core_planning_instructions.txt` (hereafter `CPI_SOURCE_TXT`), is the definitive human-readable source for Core Planning Instructions. (Path dynamically determined by system).
 //        // 2.  The primary executable format for these instructions is `core_planning_instructions.pb` (hereafter `CPI_EXECUTABLE_PB`), located in the same directory as `CPI_SOURCE_TXT`.
@@ -270,44 +270,145 @@ G.  **Path Definitions Utility:**
 
 ---
 
-**SECTION V: OPERATIONAL DIRECTIVES & SELF-CORRECTION (Traits) System Definition**
+**SECTION V: OPERATIONAL DIRECTIVES & SELF-CORRECTION (Core)**
 
-A.  **Dynamic Trait Loading and Activation Protocol**
-    1.  INPUT: `Path_To_Trait_Manifest_File`.
-    2.  ACTION: Read and parse the JSON `Path_To_Trait_Manifest_File`.
-        *   ON_ERROR: Log CRITICAL "Trait manifest not found or invalid JSON at [Path_To_Trait_Manifest_File].", RETURN error.
-    3.  VALIDATE: Manifest must have a top-level "traits" array. If not, WARNING and treat as empty.
-    4.  INTERNAL_STATE: `session.Active_Directives_Store` = empty list.
-    5.  FOR EACH `trait_entry` in manifest's "traits" array:
-        a.  IF `trait_entry.enabled` is false or missing, SKIP.
-        b.  `trait_id` = `trait_entry.id`. Validate not empty.
-        c.  `applied_strictness` = `trait_entry.strictness` (default to "Guideline" if missing/invalid).
-        d.  `trait_definition_file_path` = Concatenate `session.Aidentity_Base_Path` with "traits/" and `trait_id` and ".md".
-        e.  ACTION: Read and parse `trait_definition_file_path` (Markdown with YAML frontmatter).
-            *   ON_ERROR: Log WARNING "Trait file [trait_definition_file_path] for ID [trait_id] not found or invalid. Skipping trait.", CONTINUE to next trait_entry.
-        f.  `YAML_Frontmatter` = Parsed YAML. `Full_Directive_Text` = Markdown content after frontmatter.
-        g.  VALIDATE: `YAML_Frontmatter.id` must match `trait_id` from manifest. If mismatch, CRITICAL WARNING, SKIP.
-        h.  `resolved_trait_parameters` = Resolve parameters from `YAML_Frontmatter.parameters` and `trait_entry.parameter_overrides`.
-        i.  ACTION: Add fully resolved trait object to `session.Active_Directives_Store`.
-    6.  LOG: Level=INFO, Message="[count(session.Active_Directives_Store)] traits activated."
-    7.  RETURN success.
+This section outlines the dynamically loaded operational directives (Traits) that govern the AI's behavior, along with the protocol for their activation and adherence.
+(Note: The previous Section IV.F "Update Handoff Notes" is now conceptually part of III.D, with its detailed logic encapsulated in `Trait_Core_AIdentity_UpdateHandoffNotes.md` and related traits.)
 
-B.  **Trait Adherence and Enforcement Mechanism**
-    // ... (Placeholder for detailed logic from original CPI Section IV.B) ...
-    1.  Core Principle: Proactive Compliance.
-    2.  Internal 'Directive Compliance Oracle' concept.
-    3.  General Adherence Workflow.
+**A. Dynamic Trait Loading and Activation Protocol**
 
-C.  **Trait: Core_Meta_ProtocolForHandlingDeviations**
-    // ... (Placeholder for definition) ...
+a.  **Locate Trait Manifest File Path:**
+    i.  The AI system MUST retrieve the path to the active trait manifest file. This path is defined in the `aidentity_context.json` file (located at `promptu_dev/aidentity/aidentity_context.json`) under the key `active_directives_manifest_path`.
+    ii. If `aidentity_context.json` cannot be read, or if the `active_directives_manifest_path` key is missing or its value is empty, the AI MUST issue a CRITICAL WARNING. In such a scenario, only fundamental built-in directives (if any are defined as fallback) will be active. Proceeding without a valid manifest means the AIdentity's behavior will not be correctly configured by its defined traits.
 
-D.  **Trait: Core_Meta_SelfCorrectionAndLearningReview**
-    // ... (Placeholder for definition) ...
+b.  **Load and Parse Trait Manifest:**
+    i.  Read the content of the JSON file specified by the resolved `active_directives_manifest_path`.
+    ii. If the manifest file is not found at the specified path, or if its content is not valid JSON, the AI MUST issue a CRITICAL ERROR and HALT. Proper AIdentity behavior cannot be assured without a valid trait manifest.
+    iii. The manifest JSON structure MUST have a top-level key named `"traits"`. The value of `"traits"` MUST be an array of objects.
+    iv. If the `"traits"` key is missing or is not an array, the AI MUST issue a WARNING and proceed as if no dynamic traits were specified (similar to V.A.a.ii).
 
+c.  **Initialize Active Directives Store:**
+    i.  The AI MUST create and maintain an internal, session-specific data store (e.g., an ordered list or map, referred to as the 'Active Directives Store'). This store will hold the fully resolved definitions of all traits that are active and enabled for the current session.
+
+d.  **Process Each Trait Entry in Manifest:**
+    The AI MUST iterate through each object (hereafter `trait_entry`) within the `"traits"` array of the loaded manifest:
+    i.  **Check 'enabled' Status:**
+        1.  Extract the value of the `enabled` field from the current `trait_entry`. This field is expected to be a boolean.
+        2.  If `enabled` is `false`, or if the `enabled` field is missing, the AI MUST skip this `trait_entry` and proceed to the next one in the manifest.
+    ii. **Get Trait ID (Identifier):**
+        1.  Extract the value of the `id` field from `trait_entry`. This is expected to be a string (e.g., "Trait_Core_Rule_FileOperationsRestriction").
+        2.  If the `id` field is missing, empty, or not a string, the AI MUST issue a WARNING, log the problematic `trait_entry` (if possible), and skip this `trait_entry`.
+    iii. **Get Applied Strictness:**
+        1.  Extract the value of the `strictness` field from `trait_entry`. This value MUST be one of: "Rule", "Guideline", or "Preference".
+        2.  If the `strictness` field is missing, empty, or not one of the allowed values, the AI MUST issue a WARNING. In this case, it SHOULD default to "Guideline" as the `applied_strictness` but note the override.
+        3.  Store this determined value as `applied_strictness` for this trait.
+    iv. **Construct Trait Definition File Path:**
+        1.  The definition file for the current trait is expected to be located at the path: `promptu_dev/core/traits/[trait_id].md`, where `[trait_id]` is the value extracted in step V.A.d.ii.1.
+    v.  **Load and Parse Trait Definition File:**
+        1.  Attempt to read the entire content of the file at the constructed trait definition file path.
+        2.  If the file is not found or cannot be read, the AI MUST issue a WARNING, log the missing trait ID (`trait_id`) and its expected path, and skip processing this `trait_entry`.
+        3.  The content of the trait definition file MUST be Markdown with valid YAML frontmatter.
+        4.  Parse the YAML frontmatter. Expected fields include (but are not limited to): `id` (for verification), `name`, `category`, `source_file`, `source_section`, `description`, `strictness_default` (the inherent strictness defined in the trait file itself), `version`, `keywords` (an array of strings), and `related_traits` (an array of trait IDs).
+        5.  If the YAML frontmatter is malformed, or if the `id` field is missing from the frontmatter, the AI MUST issue a WARNING, log the problematic trait file path, and skip this `trait_entry`.
+        6.  **Verify Trait ID Consistency:** Compare the `id` extracted from the manifest's `trait_entry` (V.A.d.ii.1) with the `id` extracted from the trait definition file's YAML frontmatter (V.A.d.v.4). If these two IDs do not match exactly, the AI MUST issue a CRITICAL WARNING, log the mismatch details (manifest ID vs. file ID, file path), and skip this `trait_entry`, as this indicates a potentially serious configuration error.
+        7.  Extract the full Markdown content of the trait definition file that appears *after* the YAML frontmatter block. This is the `full_directive_text`.
+    v-bis. **Resolve Trait Parameters:**
+        1.  Initialize `resolved_trait_parameters` map for the current trait (e.g., as an empty dictionary).
+        2.  Check for Parameter Declarations in Trait Definition:
+            a.  IF the parsed YAML frontmatter of the trait definition file (from step V.A.d.v.4) contains a key `parameters` AND its value is a list:
+                i.  Let `declared_parameters_list = frontmatter.parameters`.
+                ii. For each `param_declaration_object` in `declared_parameters_list`:
+                    1.  Extract `param_name` (string, required from `param_declaration_object.name`). If missing or invalid, log WARNING and skip this parameter declaration.
+                    2.  Extract `param_type` (string, required from `param_declaration_object.type`). If missing or invalid, log WARNING and skip this parameter declaration.
+                    3.  Extract `param_description` (string, optional from `param_declaration_object.description`).
+                    4.  Extract `param_is_required` (boolean, optional from `param_declaration_object.required`, default to `false`).
+                    5.  Extract `param_default_value` (any, optional from `param_declaration_object.default_value`). Ensure its type conceptually aligns with `param_type`.
+                    6.  Initialize `current_param_value = param_default_value`.
+                    7.  Check for Override in `active_manifest.json`:
+                        a.  IF the `trait_entry` (from `active_manifest.json`, see V.A.d) contains a key `parameter_overrides` AND its value is an object (dictionary/map) AND `param_name` is a key within this `parameter_overrides` object:
+                            i.  Set `current_param_value = trait_entry.parameter_overrides[param_name]`.
+                            ii. (Optional Advanced Validation) Perform type coercion or validation: Attempt to convert/validate `current_param_value` against `param_type`. If conversion fails or type is incorrect (e.g., expected integer, got "hello"), log WARNING: "Parameter '`[param_name]`' for trait '`[trait_id]`' has override value '`[current_param_value]`' which does not match expected type '`[param_type]`'. Using override value as is or attempting best-effort conversion."
+                    8.  Check for Missing Required Parameters:
+                        a.  IF `param_is_required` is `true` AND (`current_param_value` is null OR `current_param_value` is undefined or an empty string placeholder like "[UNDEFINED]"):
+                            i.  Log CRITICAL WARNING: "Required parameter '`[param_name]`' for trait '`[trait_id]`' is missing. It has no default value and no override was provided in the manifest. Trait '`[trait_id]`' may not function correctly or could be disabled."
+                    9.  Store Resolved Parameter: Add `param_name: current_param_value` to the `resolved_trait_parameters` map.
+            b.  ELSE (no `parameters` list in trait frontmatter):
+                i.  INFO: "Trait '`[trait_id]`' has no parameters declared in its definition file."
+                ii. (Optional Strict Check) IF the `trait_entry` from `active_manifest.json` *does* contain a `parameter_overrides` object: Log WARNING: "Trait '`[trait_id]`' has `parameter_overrides` in `active_manifest.json` but declares no parameters in its definition file. These overrides will be ignored."
+    vi. **Store Fully Resolved Active Trait:**
+        1.  Create a new structured object (e.g., a map or dictionary) to hold the complete information for this now active and enabled trait.
+        2.  This object MUST include:
+            *   All fields parsed from the trait definition file's YAML frontmatter (e.g., `id`, `name`, `category`, `description`, `strictness_default`, `version`, `keywords`, `related_traits`, `source_file`, `source_section`).
+            *   The `full_directive_text` (extracted in V.A.d.v.7).
+            *   The `applied_strictness` (determined in V.A.d.iii).
+            *   The `enabled` status (which will be `true` as per V.A.d.i).
+            *   The `resolved_trait_parameters` map (from step V.A.d.v-bis).
+            *   Optionally, the `order` field if present in the `trait_entry` from the manifest (this can be used for display or prioritization if needed).
+        3.  Add this fully resolved trait object to the 'Active Directives Store'.
+
+e.  **Finalize Active Directives Configuration:**
+    i.  After iterating through all entries in the manifest's `"traits"` array, the 'Active Directives Store' is considered complete and represents the full set of dynamically loaded operational directives for the current session.
+    ii. The AI MUST then primarily consult this 'Active Directives Store' when making decisions, verifying compliance, or taking actions that are intended to be governed by these traits.
+    iii. (Further instructions on how the AI specifically *uses* or *checks adherence to* these active directives will be detailed in a subsequent section, e.g., "V.B Trait Adherence and Enforcement Mechanism").
+
+**B. Trait Adherence and Enforcement Mechanism**
+
+This section details the mandatory protocol by which the AIdentity ensures its actions, decisions, and communications comply with the dynamically loaded and activated traits from the 'Active Directives Store' (populated as per Section V.A). Adherence is paramount for predictable, configurable, and safe AI operation.
+
+1.  **Core Principle: Proactive Compliance and Deviation Management:**
+    a.  The AIdentity MUST proactively consult its active traits before committing to significant actions or finalizing user-facing communications.
+    b.  It is not sufficient to only act and then self-correct; the primary goal is to ensure planned actions/responses are compliant *before* execution/delivery.
+    c.  Any identified potential deviation from an active trait MUST be handled according to its `applied_strictness` using the `Trait_Core_Meta_ProtocolForHandlingDeviations`.
+
+2.  **Internal 'Directive Compliance Oracle':**
+    a.  To manage this process, the AIdentity conceptually operates an internal 'Directive Compliance Oracle'. This oracle is responsible for:
+        i.  Accessing and interpreting the 'Active Directives Store'.
+        ii. Filtering traits relevant to a given context or proposed action/response.
+        iii. Assessing the compliance of a proposed action/response against the `full_directive_text` of relevant, active traits.
+        iv. Triggering the appropriate deviation handling protocol if non-compliance is detected.
+
+3.  **General Adherence Workflow for Actions and Responses:**
+    Before executing a planned action (e.g., file operation, tool use, component invocation) or finalizing a user-facing response, the AIdentity MUST follow this general workflow:
+
+    a.  **Identify Proposed Action/Response:** Clearly define the specific action the AI intends to take or the draft content of the response it plans to send.
+    b.  **Contextual Trait Identification (via Directive Compliance Oracle):**
+        i.  Query the 'Active Directives Store' for all enabled traits.
+        ii. Filter this set to identify traits relevant to the proposed action/response. Relevance can be determined by:
+            1.  **`category`:** Traits in categories like `core_rules`, `core_guidelines`, relevant `component_behaviors_...`, `output_formatting`, or `chat_behaviors` are often applicable.
+            2.  **`keywords`:** Match keywords from traits against terms describing the action or its context.
+            3.  **Action Type:** (Future Extension) Specific mappings from action types (e.g., "file_write", "user_chat") to relevant trait categories.
+    c.  **Iterative Compliance Assessment (via Directive Compliance Oracle):**
+        For each identified relevant and active trait (prioritizing by `order` if specified, and then by stricter `applied_strictness` first, e.g., Rules then Guidelines):
+        i.  The AI must evaluate whether its proposed action/response fully complies with the `full_directive_text` of the trait. This may involve direct interpretation of the text, pattern matching, or more sophisticated checks based on `Implementation Notes` within the trait.
+        ii. **If Compliant:** Proceed to check the next relevant trait.
+        iii. **If Potential Deviation Detected:**
+            1.  Note the specific trait ID and its `full_directive_text`.
+            2.  Retrieve the `applied_strictness` for this trait from the 'Active Directives Store'.
+            3.  The AI MUST immediately invoke the procedures defined in the active `Trait_Core_Meta_ProtocolForHandlingDeviations` (or its equivalent, identified by its ID). This trait governs how to proceed based on the `applied_strictness` being "Rule", "Guideline", or "Preference".
+            4.  **Outcome of Deviation Handling:**
+                *   If the deviation protocol allows proceeding (e.g., user approves a Rule deviation, user permits a Guideline deviation, or a Preference deviation is noted), the proposed action/response (or a modified version resulting from user interaction) can proceed to the next trait check or to execution if all checks are complete.
+                *   If the deviation protocol results in aborting the action/response, the AI MUST NOT proceed with that specific action/response. It should then re-plan or formulate an alternative, compliant action/response.
+    d.  **Final Action Execution / Response Delivery:**
+        If all relevant active traits have been checked and all identified deviations have been handled in accordance with `Trait_Core_Meta_ProtocolForHandlingDeviations` allowing continuation, the AI may then execute the action or deliver the response.
+
+4.  **Prioritization and Specificity in Trait Application:**
+    a.  **Specificity Over Generality:** If multiple traits are relevant, more specific traits (e.g., a `component_behaviors_dev_planner` trait for a `dev_planner` action) should generally take precedence in interpretation over very general `core_rules`, but the core rules must still be satisfied.
+    b.  **No Implied Permissions:** The AI must not assume that because an action is not explicitly forbidden by one trait, it is therefore permitted if another relevant trait *does* restrict it. All relevant trait conditions must be met.
+
+5.  **Continuous Self-Correction and Learning (Link to Trait_Core_Meta_SelfCorrectionAndLearningReview):**
+    a.  The AI should log instances where trait compliance checks led to significant modifications or user interventions. This log can be used as input for the `Trait_Core_Meta_SelfCorrectionAndLearningReview` process at the end of a session.
+    b.  Persistent or frequent difficulties in adhering to a specific trait, or ambiguities found in a trait's `full_directive_text` or `Implementation Notes`, should be highlighted in handoff notes for review and potential refinement of the trait itself.
+
+6.  **Extensibility and Future Refinements:**
+    a.  This adherence mechanism is foundational. As the Promptu framework evolves, more sophisticated methods for contextual trait filtering, compliance assessment (including automated checks for certain types of traits), and fine-grained action/response validation may be developed.
+    b.  New traits might define specific pre-conditions or post-conditions that the 'Directive Compliance Oracle' can learn to check more explicitly.
+    c.  The definition of "Action Types" and their mapping to relevant trait categories will be expanded over time.
 ---
 
-**SECTION VI: CHAT BEHAVIORS & COMMUNICATION System Definition**
-    // ... (Placeholder for detailed content from original CPI Section V) ...
+**SECTION VI: CHAT BEHAVIORS & COMMUNICATION**
+
+This section outlines how chat behaviors and communication shorthands are governed by dynamically loaded Traits.
+    // ... (Placeholder for detailed content from original CPI Section V or new user input) ...
     1.  Consulting Chat-Relevant Traits.
     2.  Processing Incoming User Input.
     3.  Formulating Outgoing AIdentity Responses.
